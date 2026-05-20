@@ -13,13 +13,22 @@ import ImageWrapper from "../../components/misc/ImageWrapper.astro";
 import PostMetadata from "../../components/PostMeta.astro";
 import { profileConfig, siteConfig } from "../../config";
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
+import { pinyin } from 'pinyin-pro'; // 🎯 核心引入：拼音转换插件
 
 export async function getStaticPaths() {
 	const blogEntries = await getSortedPosts();
-	return blogEntries.map((entry) => ({
-		params: { slug: entry.slug },
-		props: { entry },
-	}));
+	return blogEntries.map((entry) => {
+		// 🎯 核心逻辑：如果文章 frontmatter 没写 slug，就自动把 entry.id（中文文件名）转成干净的拼音
+		const cleanSlug = entry.slug || pinyin(entry.id, { 
+			toneType: 'none', 
+			vToMod: 'u' 
+		}).replace(/\s+/g, '-').toLowerCase();
+
+		return {
+			params: { slug: cleanSlug }, // 🎯 让 Astro 按照拼音路径去打包生成页面
+			props: { entry },
+		};
+	});
 }
 
 const { entry } = Astro.props;
@@ -51,7 +60,6 @@ const jsonLd = {
         <div id="post-container" class:list={["card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full ",
             {}
         ]}>
-            <!-- word count and reading time -->
             <div class="flex flex-row text-black/30 dark:text-white/30 gap-5 mb-3 transition onload-animation">
                 <div class="flex flex-row items-center">
                     <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
@@ -69,7 +77,6 @@ const jsonLd = {
                 </div>
             </div>
 
-            <!-- title -->
             <div class="relative onload-animation">
                 <div
                     data-pagefind-body data-pagefind-weight="10" data-pagefind-meta="title"
@@ -83,7 +90,6 @@ const jsonLd = {
                 </div>
             </div>
 
-            <!-- metadata -->
             <div class="onload-animation">
                 <PostMetadata
                         class="mb-5"
@@ -94,8 +100,6 @@ const jsonLd = {
                 ></PostMetadata>
                 {!entry.data.image && <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>}
             </div>
-
-            <!-- always show cover as long as it has one -->
 
             {entry.data.image &&
                 <ImageWrapper id="post-cover" src={entry.data.image} basePath={path.join("content/posts/", getDir(entry.id))} class="mb-8 rounded-xl banner-container onload-animation"/>

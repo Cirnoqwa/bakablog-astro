@@ -89,6 +89,9 @@ importers:
       photoswipe:
         specifier: ^5.4.4
         version: 5.4.4
+      pinyin-pro:
+        specifier: ^3.28.1
+        version: 3.28.1
       reading-time:
         specifier: ^1.5.0
         version: 1.5.0
@@ -4104,6 +4107,9 @@ packages:
   pify@5.0.0:
     resolution: {integrity: sha512-eW/gHNMlxdSP6dmG6uJip6FXN0EQBwm2clYYd8Wul42Cwu/DK8HEftzsapcNdYe2MfLiIwZqsDk2RDEsTE79hA==}
     engines: {node: '>=10'}
+
+  pinyin-pro@3.28.1:
+    resolution: {integrity: sha512-oqz8ulwRgtUXRi0vbqEfGNly19zpyCxYrjhkk5TibGcgSW6eNwS5woajCXRwqURi8Ehc2yOFTiB4uNoZ+NJOnA==}
 
   pirates@4.0.7:
     resolution: {integrity: sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==}
@@ -10146,6 +10152,8 @@ snapshots:
   pify@2.3.0: {}
 
   pify@5.0.0: {}
+
+  pinyin-pro@3.28.1: {}
 
   pirates@4.0.7: {}
 
