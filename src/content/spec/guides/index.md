@@ -1,5 +1,5 @@
 ---
-title: Guides
+title: Guides 高玩操作
 published: 2026-05-20
 description: "How to use this blog style and more."
 image: "/images/cover.jpeg"
@@ -43,8 +43,9 @@ const currentYear = new Date().getFullYear();
    <link rel="stylesheet" href="/live2d_dist/waifu.css" />
    <script is:inline src="/live2d_dist/autoload.js"></script>
 </div>
-
 ```
+*我也不是这方面的高玩,可能有些错误,欢迎指正*
+
 ---
 
 <mark style="background-color:#FFB6C1;padding:4px 10px;border-radius:6px 6px 6px 6px;color:white;font-weight:bold;">二、此博客的Style样式</mark><br>
