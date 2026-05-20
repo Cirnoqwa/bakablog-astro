@@ -1,0 +1,14 @@
+[
+  [
+    "texture_00/closet-default-v2.png",
+    "texture_01/default-upper.png",
+    "texture_02/default-lower.png",
+    "texture_03/default-hat.png"
+  ],
+  [
+    "texture_00/closet-default-v2.png",
+    "texture_01/valley2017-upper.png",
+    "texture_02/valley2017-lower.png",
+    "texture_03/school2017-hat.png"
+  ]
+]
