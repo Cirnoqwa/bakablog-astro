@@ -2,7 +2,7 @@
 title: "关于次元反作弊"
 published: 2026-05-03
 description: "次元反作弊：维护公平（黑客更多）与提高性能（TPS 0.67）的终极服务器解决方案"
-tags: ["反作弊", "乐子"]
+tags: ["反作弊", "乐子","DAC"]
 category: "乐子"
 draft: false
 ---
