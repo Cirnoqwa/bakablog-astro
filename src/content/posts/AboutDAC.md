@@ -39,6 +39,7 @@ draft: false
     腐竹:雷咖啡、白子等
 </mark>
 </p>
+<iframe width="100%" height="468" src="https://atomfor.ge" title="Atomforge的乐子监控" frameborder="0" allowfullscreen></iframe>
 
 ---
 
