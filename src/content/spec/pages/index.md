@@ -14,10 +14,11 @@ draft: false
 
 ---
 
+
 <p>
 <mark style="background-color: #39C5BB; padding: 4px 10px; border-radius: 6px 0 0 6px;">
     <a href="/pages/mikutap/index.html" style="color: white; text-decoration: none; font-weight: bold;">MikuTap</a>
-</mark><mark style="background-color: #FFB6C1; padding: 4px 10px; border-radius: 0 6px 6px 0; color: white; font-size: 0.9em;">
+</mark><mark style="background-color: #FFB6C1; padding: 4px 10px; border-radius: 0 6px 6px 0; color: white; font-size: 0.9em;font-weight: bold;">
     原作者: daniwell@aidn.jp
 </mark>
 </p>
