@@ -8,10 +8,6 @@ category: "乐子"
 draft: false
 ---
 
-><mark style="background-color:red;">群主已在2026/5/16日因手*过度出血最终抢救无效全局感染致死</mark>
-
----
-
 >*由于我突然觉得我似乎过于不合适重新修改了该帖子*
 
 ---
@@ -55,8 +51,8 @@ FPV(一种无人机的变种，飞的很快)😇
 
 ---
 
-**接下来,最令人难绷的图片来了(感谢huishi6014提供的图片)**
-*请耐心看完,谢谢!（ '▿ ' ）*
+**接下来,最令人难绷的图片来了(感谢huishi6014提供的图片)**<br>
+**他的黑历史,请理性观看**<br>
 
 <details>
    <summary><mark style="background-color: lightpink;">[图片1]点击展开</mark></summary>
