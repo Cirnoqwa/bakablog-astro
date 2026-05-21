@@ -14,26 +14,17 @@
 <p>
 <mark style="background-color: #39C5BB; padding: 4px 10px; border-radius: 6px 0 0 6px;">
     <a href="https://marblemc.top" style="color: white; text-decoration: none; font-weight: bold;">大理石网</a>
-</mark><mark style="background-color: #FFB6C1; padding: 4px 10px; border-radius: 0 6px 6px 0; color: white; font-size: 0.9em;">
+</mark><mark style="background-color: #FFB6C1; padding: 4px 10px; border-radius: 0 6px 6px 0; color: white; font-size: 0.9em;font-weight: bold;">
     作者: Romarku
 </mark>
 </p>
 
-<!-- 大理石博客网 -->
+<!-- Atomforge -->
 <p>
-<mark style="background-color: #39C5BB; padding: 4px 10px; border-radius: 6px 0 0 6px;">
-    <a href="https://blog.marblemc.top" style="color: white; text-decoration: none; font-weight: bold;">大理石博客网</a>
-</mark><mark style="background-color: #FFB6C1; padding: 4px 10px; border-radius: 0 6px 6px 0; color: white; font-size: 0.9em;">
-    作者: Romarku
-</mark>
-</p>
-
-<!-- 讨伐爱玩电脑的CMD -->
-<p>
-<mark style="background-color: #39C5BB; padding: 4px 10px; border-radius: 6px 0 0 6px;">
-    <a href="http://cmd.kingpop.top" style="color: white; text-decoration: none; font-weight: bold;">讨伐爱玩电脑的CMD</a>
-</mark><mark style="background-color: #FFB6C1; padding: 4px 10px; border-radius: 0 6px 6px 0; color: white; font-size: 0.9em;">
-    作者: YukitaRikoOL
+<mark style="background-color: #39C5BB; padding: 4px 10px; border-radius: 6px 0 0 6px; color: white; font-weight: bold;">
+    <a href="https://atomfor.ge" style="color: white; text-decoration: none; font-weight: bold;">Atomfor.ge</a>
+</mark><mark style="background-color: #FFB6C1; padding: 4px 10px; border-radius: 0 6px 6px 0; color: white; font-size: 0.9em; font-weight: bold;">
+    腐竹:雷咖啡、白子等
 </mark>
 </p>
 

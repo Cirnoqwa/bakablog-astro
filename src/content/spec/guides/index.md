@@ -87,7 +87,7 @@ const currentYear = new Date().getFullYear();
 <p>
 <mark style="background-color: #39C5BB; padding: 4px 10px; border-radius: 6px 0 0 6px;">
     <a href="这里换成网址" style="color: white; text-decoration: none; font-weight: bold;">网站/项目名</a>
-</mark><mark style="background-color: #FFB6C1; padding: 4px 10px; border-radius: 0 6px 6px 0; color: white; font-size: 0.9em;">
+</mark><mark style="background-color: #FFB6C1; padding: 4px 10px; border-radius: 0 6px 6px 0; color: white; font-size: 0.9em;font-weight: bold;">
     作者: XXX / 网址等信息
 </mark>
 </p>
@@ -97,7 +97,7 @@ const currentYear = new Date().getFullYear();
 ><p>
 ><mark style="background-color: #39C5BB; padding: 4px 10px; border-radius: 6px 0 0 6px;">
 >    <a href="这里换成网址" style="color: white; text-decoration: none; font-weight: bold;">网站/项目名</a>
-></mark><mark style="background-color: #FFB6C1; padding: 4px 10px; border-radius: 0 6px 6px 0; color: white; font-size: 0.9em;">
+></mark><mark style="background-color: #FFB6C1; padding: 4px 10px; border-radius: 0 6px 6px 0; color: white; font-size: 0.9em;font-weight: bold;">
 >    作者: XXX / 网址等信息
 ></mark>
 ></p>
