@@ -134,9 +134,10 @@ FPV(一种无人机的变种，飞的很快)😇
 
 <p> 他的Bilibili: <mark style="background-color: #39C5BB; padding: 4px 10px; border-radius: 6px 0 0 6px;"><a href="https://space.bilibili.com/3546632236829522" style="color: white; text-decoration: none; font-weight: bold;">点击访问</a></mark><mark style="background-color: #FFB6C1; padding: 4px 10px; border-radius: 0 6px 6px 0; color: white; font-size: 0.9em;"><a href="https://space.bilibili.com/3546632236829522" style="color: white; text-decoration: none; font-weight: bold;">B站个人主页</a></mark> </p>
 
-他的粉丝群(引用bilibili简介):
+他的粉丝群(引用bilibili简介):<br>
 `` 我的世界，编程：python，c++ 这个人--没有昵称的fans交流群 1071581361，交流群2 956315000 ``
 
+他的企鹅号(非必要不要乱传打扰人家): :spoiler[3931471142]
 <br>
 
 <p>
