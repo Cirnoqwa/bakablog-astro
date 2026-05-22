@@ -1,0 +1,13 @@
+{
+  "nodes": [
+    { "id": "1", "label": "主角", "image": "/avatars/hero1.png" },
+    { "id": "2", "label": "导师", "image": "/avatars/hero2.png" },
+    { "id": "3", "label": "宿敌", "image": "/avatars/hero3.png" },
+    { "id": "4", "label": "盟友", "image": "/avatars/hero4.png" }
+  ],
+  "links": [
+    { "from": "1", "to": "2", "label": "师徒" },
+    { "from": "1", "to": "3", "label": "宿敌" },
+    { "from": "1", "to": "4", "label": "结盟" }
+  ]
+}

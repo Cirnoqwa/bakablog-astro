@@ -1,3 +1,9 @@
+---
+import Graph from '../components/Graph.astro';
+---
+<!-- 引入通用组件，它会自动读取 JSON 数据 -->
+<Graph />
+
 # About
 :::note
 - ✍️ Site Owner : Cirno_qwa 
