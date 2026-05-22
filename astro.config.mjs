@@ -31,7 +31,9 @@ export default defineConfig({
     site: "https://fuwari.vercel.app/",
     base: "/",
     trailingSlash: "always",
-
+    
+    output: "static"
+    
     integrations: [
 		tailwind({
 			nesting: true,
