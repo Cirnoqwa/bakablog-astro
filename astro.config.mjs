@@ -32,7 +32,7 @@ export default defineConfig({
     base: "/",
     trailingSlash: "always",
     
-    output: "static"
+    output: "static",
     
     integrations: [
 		tailwind({
