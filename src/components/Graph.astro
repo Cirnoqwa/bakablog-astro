@@ -1,107 +1,66 @@
 ---
-// ⚡️ 核心：从独立文件导入数据，和逻辑解耦！
-import graphData from '../data/stars.json';
+// ⚡️ 核心：让组件接受一个名为 data 的参数
+interface Props {
+  data: {
+    nodes: Array<{ id: string; name: string; icon: string }>;
+    links: Array<{ source: string; target: string; label: string }>;
+  };
+}
+
+const { data: graphData } = Astro.props;
 ---
 
-<div class="network-container">
-  <!-- 搜索栏 -->
-  <div class="search-box">
-    <input type="text" id="search-node" placeholder="输入名称查询..." />
-    <button id="search-btn">观测</button>
-  </div>
-  
-  <!-- 画布容器 -->
-  <div id="vis-network"></div>
+<div class="mod-graph-container">
+  <div class="echarts-main"></div>
 </div>
 
-<!-- 引入第三方超轻量库 -->
-<script is:inline src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<script>
+  import * as echarts from 'echarts';
 
-<script define:vars={{ graphData }}>
-  // 这里的代码是完全动态的，会自动根据 JSON 里的数据渲染
-  const container = document.getElementById("vis-network");
+  // 找齐页面上所有的图表容器（支持同页多图）
+  const containers = document.querySelectorAll('.echarts-main');
+  
+  containers.forEach(container => {
+    // ⚡️ 绝招：通过 dataset 把 Astro 后端拿到的动态数据，安全地塞给前端 script
+    const graphData = JSON.parse(container.getAttribute('data-graph') || '{}');
+    if (!graphData.nodes) return;
 
-  // 1. 自动映射节点配置
-  const nodes = graphData.nodes.map(node => ({
-    id: node.id,
-    label: node.label,
-    shape: "circularImage",     
-    image: node.image,         
-    size: 35,                  
-    borderWidth: 3,            
-    color: {
-      border: "#4f46e5",       
-      background: "#0f0c1b",
-      highlight: { border: "#00ffcc", background: "#0f0c1b" } 
-    },
-    font: { color: "#ffffff", size: 14, vadjust: 12 } 
-  }));
+    const myChart = echarts.init(container as HTMLElement, 'dark');
 
-  // 2. 自动映射连线配置
-  const edges = graphData.links.map(link => ({
-    from: link.from,
-    to: link.to,
-    label: link.label,
-    color: { color: "rgba(255, 255, 255, 0.15)", highlight: "#00ffcc" },
-    font: { color: "#aaa", size: 11, align: "top" }
-  }));
+    const option = {
+      backgroundColor: '#111',
+      tooltip: { trigger: 'item' },
+      series: [
+        {
+          type: 'graph',
+          layout: 'force',
+          roam: true,
+          draggable: true,
+          focusNodeAdjacency: true,
+          data: graphData.nodes.map((node: any) => ({
+            id: node.id,
+            name: node.name,
+            symbol: `image://${node.icon}`,
+            symbolSize: 40,
+            label: { show: true, position: 'bottom', color: '#fff' }
+          })),
+          edges: graphData.links.map((link: any) => ({
+            source: link.source,
+            target: link.target,
+            label: { show: true, formatter: link.label, fontSize: 10 },
+            lineStyle: { color: 'rgba(255,255,255,0.3)', width: 2, curveness: 0.1 }
+          })),
+          force: { repulsion: 400, edgeLength: 180, gravity: 0.05 }
+        }
+      ]
+    };
 
-  const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
-
-  // 3. 丝滑物理引擎配置
-  const options = {
-    nodes: { useBorderWithImage: true },
-    interaction: { hover: true, dragNodes: true, dragView: true, zoomView: true },
-    physics: {
-      solver: "forceAtlas2Based",
-      forceAtlas2Based: { gravitationalConstant: -120, centralGravity: 0.01, springLength: 160, springConstant: 0.08 }
-    }
-  };
-
-  // 初始化
-  const network = new vis.Network(container, data, options);
-
-  // 4. 通用搜索定位
-  document.getElementById("search-btn").addEventListener("click", () => {
-    const searchVal = document.getElementById("search-node").value.trim();
-    if (!searchVal) return;
-
-    const targetNode = nodes.find(n => n.label.includes(searchVal));
-
-    if (targetNode) {
-      network.selectNodes([targetNode.id]);
-      network.focus(targetNode.id, {
-        scale: 1.2,
-        animation: { duration: 800, easingFunction: "easeInOutQuad" }
-      });
-    } else {
-      alert("未能在星图中定位该节点");
-    }
+    myChart.setOption(option);
+    window.addEventListener('resize', () => myChart.resize());
   });
 </script>
 
 <style>
-  /* 样式全屏撑满，背景做成深色星空感 */
-  .network-container {
-    width: 100vw;
-    height: 100vh;
-    background: radial-gradient(circle at center, #111827 0%, #030712 100%);
-    position: relative;
-    overflow: hidden;
-  }
-  #vis-network { width: 100%; height: 100%; }
-  .search-box {
-    position: absolute; top: 20px; left: 20px; z-index: 10;
-    display: flex; gap: 8px; background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px); padding: 8px; border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  .search-box input {
-    background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white; padding: 6px 12px; border-radius: 6px; outline: none;
-  }
-  .search-box button {
-    background: #4f46e5; color: white; border: none;
-    padding: 6px 16px; border-radius: 6px; cursor: pointer;
-  }
+  .mod-graph-container { width: 100vw; height: 100vh; overflow: hidden; }
+  .echarts-main { width: 100%; height: 100%; }
 </style>

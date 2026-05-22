@@ -1,0 +1,13 @@
+{
+  "nodes": [
+    { "id": "1", "name": "工业时代2 (IC2)", "icon": "/icons/ic2.png" },
+    { "id": "2", "name": "高级太阳能", "icon": "/icons/adv_solar.png" },
+    { "id": "3", "name": "重力装甲", "icon": "/icons/gravi.png" },
+    { "id": "4", "name": "通用机械 (Mechanism)", "icon": "/icons/mek.png" }
+  ],
+  "links": [
+    { "source": "2", "target": "1", "label": "依赖前置" },
+    { "source": "3", "target": "1", "label": "依赖前置" },
+    { "source": "4", "target": "1", "label": "兼容/电网互通" }
+  ]
+}
