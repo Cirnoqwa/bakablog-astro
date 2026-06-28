@@ -1,0 +1,648 @@
+<!-----
+layout: false
+--->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Hacknet - Ultimate Entech Sequencer Remake</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+            user-select: none;
+        }
+
+        body {
+            background-color: #030508;
+            color: #3ef4f9;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* 引导载入层 */
+        #loader-layer {
+            position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 9999; background: #090e15; padding: 25px;
+            border: 1px solid #1a2d44; text-align: center; box-shadow: 0 0 20px rgba(62,244,249,0.2);
+        }
+        button {
+            background: #0d1824; color: #3ef4f9; border: 1px solid #3ef4f9;
+            padding: 8px 24px; cursor: pointer; font-weight: bold; margin-top: 15px;
+        }
+        button:hover { background: #3ef4f9; color: #000; }
+
+        /* 场景1：Brial 验证面板 */
+        #login-screen {
+            display: none; width: 100%; height: 100%; padding: 60px; background: #000;
+        }
+        .brial-main { font-size: 32px; color: #ffffff; font-weight: bold; }
+        .brial-sub { font-size: 24px; color: #8b3a3a; font-weight: normal; margin-left: 10px; }
+        .brial-line { width: 600px; margin-top: 5px; margin-bottom: 20px; border-bottom: 4px double #ffffff; }
+        .login-text { font-size: 20px; margin-bottom: 10px; height: 28px; }
+        .g-text { color: #006400; } 
+        .r-text { color: #8b0000; } 
+        .s-text { color: #00ff00; font-weight: bold; }
+
+        /* 场景2：Hacknet 主操作系统 */
+        #hacknet-os {
+            display: none; width: 100vw; height: 100vh; padding: 5px; position: relative;
+        }
+
+        /* 🚨 原版神髓：从顶端匀速向下碾压的半透明追踪红线 */
+        #trace-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 0%;
+            background: rgba(255, 0, 0, 0.15);
+            border-bottom: 4px dashed #ff1111;
+            z-index: 900;
+            pointer-events: none;
+        }
+
+        /* 🚨 15.5秒瞬间突入的全局闪烁大字 */
+        #gogogo-banner {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: #ff0000; font-size: 140px; font-weight: 900; z-index: 1000;
+            display: none; text-shadow: 0 0 40px #ff0000;
+            animation: blinker 0.2s linear infinite;
+            letter-spacing: 5px;
+        }
+
+        /* 经典四合一网格架构（严格按照指示排布） */
+        .os-grid {
+            width: 100%; height: 100%;
+            display: grid;
+            grid-template-columns: 290px 1fr 450px; /* 左：内存+指令 | 中：核心显示+地图 | 右：命令行 */
+            gap: 6px;
+        }
+
+        .left-column { grid-column: 1; display: flex; flex-direction: column; gap: 6px; }
+        .middle-column { grid-column: 2; display: flex; flex-direction: column; gap: 6px; }
+
+        .hn-panel {
+            background: #010305; border: 1px solid #101c28;
+            display: flex; flex-direction: column; overflow: hidden; position: relative;
+        }
+        .hn-header {
+            background: #050a10; border-bottom: 1px solid #101c28;
+            padding: 6px 10px; font-size: 11px; color: #4975a1; font-weight: bold; letter-spacing: 1px;
+        }
+
+        /* ================= 【左侧面板】 ================= */
+        /* RAM 监控（严格限定容量上限） */
+        #ram-panel { height: 55%; }
+        .ram-status-bar { padding: 10px; font-size: 11px; color: #4b78a4; border-bottom: 1px solid #101c28; background: #020509; }
+        .ram-prog-list { flex-grow: 1; padding: 10px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+        
+        /* 🚨 运行在内存列中的独立工具物理方块 */
+        .ram-active-block {
+            background: rgba(62, 244, 249, 0.08); border: 1px solid #3ef4f9;
+            padding: 8px; font-size: 12px; color: #fff; position: relative;
+        }
+        .ram-active-block .ram-inner-bar {
+            height: 4px; background: #3ef4f9; margin-top: 6px; width: 0%;
+        }
+
+        /* 左下角：红色快捷 ATTACK 命令区 */
+        #attack-panel { height: 45%; border-color: #501010; }
+        .attack-body { flex-grow: 1; padding: 12px; display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+        .attack-btn {
+            background: #0f0303; border: 1px solid #661111; color: #b32d2d;
+            padding: 12px; font-size: 12px; font-weight: bold; text-align: left; letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .attack-btn.active {
+            background: #3d0808; border-color: #ff2222; color: #fff;
+            box-shadow: 0 0 10px #ff2222; animation: pulse 0.5s infinite alternate;
+        }
+
+        /* ================= 【中间面板】 ================= */
+        /* 中间上方：显示器 */
+        #display-panel { height: 55%; }
+        .display-body { flex-grow: 1; display: flex; justify-content: center; align-items: center; background: #000; }
+        
+        #node-viewer { width: 94%; height: 92%; border: 1px solid #132435; background: #03060a; display: flex; flex-direction: column; }
+        .v-hd { padding: 12px; border-bottom: 1px solid #132435; background: #060d16; color: #fff; }
+        .v-ports { padding: 12px; flex-grow: 1; font-size: 12px; color: #517ca5; line-height: 1.6; }
+        .p-row { display: flex; justify-content: space-between; max-width: 320px; border-bottom: 1px dashed #0c1622; margin-bottom: 4px; }
+        .p-open { color: #00ff00; font-weight: bold; }
+        .p-lock { color: #ff2222; }
+
+        /* Sequencer 同步视窗 */
+        #sequencer-window {
+            width: 90%; height: 80%; border: 1px solid #3ef4f9; background: #02070e;
+            padding: 20px; display: none; flex-direction: column; justify-content: space-between;
+        }
+        .seq-bar-container { width: 100%; height: 26px; border: 1px solid #3ef4f9; background: #000; position: relative; }
+        .seq-bar-fill { height: 100%; width: 0%; background: #3ef4f9; }
+        .seq-bar-text { position: absolute; width: 100%; text-align: center; top: 4px; color: #fff; font-size: 12px; font-weight: bold; }
+
+        /* 中间下方：节点地图 */
+        #netmap-panel { height: 45%; }
+        .netmap-body { flex-grow: 1; position: relative; background: #000102; }
+        .node {
+            position: absolute; width: 12px; height: 12px; background: #3ef4f9; border-radius: 1px;
+            transform: translate(-50%, -50%); display: none; box-shadow: 0 0 6px #3ef4f9;
+        }
+        .node.target-glow { background: #ff2222; box-shadow: 0 0 15px #ff2222; animation: pulse 0.4s infinite alternate; }
+        .node-lbl { position: absolute; left: 16px; top: -4px; white-space: nowrap; color: #fff; font-size: 11px; }
+
+        /* ================= 【右侧面板】 ================= */
+        /* 右侧：命令行终端 */
+        #terminal-panel { grid-column: 3; }
+        .terminal-body { flex-grow: 1; padding: 12px; display: flex; flex-direction: column; justify-content: flex-end; font-size: 12px; }
+        #terminal-rows { overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-end; color: #39b7bc; }
+        .t-in { color: #ffffff; margin-top: 2px; font-weight: bold; }
+        .t-out { color: #3ef4f9; margin-bottom: 1px; }
+        .t-err { color: #ff2222; font-weight: bold; }
+
+        /* 🚨 全局 Entech 警报过载模式样式 */
+        body.emergency-mode { background-color: #0c0101; }
+        body.emergency-mode .hn-panel { border-color: #440a0a; background: #050000; }
+        body.emergency-mode .hn-header { background: #140202; border-bottom-color: #440a0a; color: #ff4444; }
+        body.emergency-mode .t-out { color: #ff3333; }
+        body.emergency-mode #node-viewer { border-color: #ff2222; background: #120101; }
+        body.emergency-mode .v-hd { background: #220303; border-bottom-color: #ff2222; }
+        body.emergency-mode .ram-active-block { border-color: #ff2222; background: rgba(255,34,34,0.08); }
+        body.emergency-mode .ram-active-block .ram-inner-bar { background: #ff2222; }
+
+        /* 最终断开连接场景 */
+        #disconnect-layer {
+            display: none; width: 100vw; height: 100vh; background: #000;
+            justify-content: center; align-items: center; color: #fff; font-size: 26px; letter-spacing: 3px;
+        }
+
+        .blink { animation: blinker 0.8s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+        @keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
+
+        #debug-panel { position: fixed; bottom: 5px; right: 5px; z-index: 10000; opacity: 0.1; }
+        #debug-panel:hover { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div id="loader-layer">
+        <h3 style="font-size:14px; color:#fff;">HACKNET OS</h3>
+        <p style="font-size:11px; color:#4975a1; margin-top:4px;">使用Gemini制作</p>
+        <button id="btn-start">载入网格并执行</button>
+    </div>
+
+    <div id="login-screen">
+        <div><span class="brial-main">BRIAL</span><span class="brial-sub">二代验证系统</span></div>
+        <div class="brial-line"></div>
+        <div class="login-text" id="br-user"></div>
+        <div class="login-text" id="br-pass"></div>
+        <div class="login-text" id="br-stat"></div>
+    </div>
+
+    <div id="hacknet-os">
+        <div id="trace-overlay"></div>
+        <div id="gogogo-banner">GO GO GO</div>
+
+        <div class="os-grid">
+            
+            <div class="left-column">
+                <div class="hn-panel" id="ram-panel">
+                    <div class="hn-header">RAM_USAGE_MONITOR</div>
+                    <div class="ram-status-bar">
+                        <span>TOTAL CAPACITY: 720 MB</span><br>
+                        <span id="ram-indicator" style="color:#fff; font-weight:bold;">USED: 150 MB</span>
+                    </div>
+                    <div class="ram-prog-list" id="ram-apps-container"></div>
+                </div>
+
+                <div class="hn-panel" id="attack-panel">
+                    <div class="hn-header">ATTACK_INTERFACE_BAR</div>
+                    <div class="attack-body">
+                        <div class="attack-btn" id="atk-connect">连接rmk.rmk.rmk.rmk</div>
+                        <div class="attack-btn" id="atk-delete">删除Marble大理石人员数据</div>
+                        <div class="attack-btn" id="atk-disconnect">断开连接</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="middle-column">
+                <div class="hn-panel" id="display-panel">
+                    <div class="hn-header">DISPLAY_SCREEN_BUFFER</div>
+                    <div class="display-body">
+                        
+                        <div id="node-viewer">
+                            <div class="v-hd">
+                                <h4 id="v-title">LOCALHOST</h4>
+                                <div style="font-size:11px; color:#3ef4f9; margin-top:2px;" id="v-ip">IP: 127.0.0.1</div>
+                            </div>
+                            <div class="v-ports" id="v-list"></div>
+                        </div>
+
+                        <div id="sequencer-window">
+                            <div style="color:#ff2222; font-size:15px; font-weight:bold; letter-spacing:1px; text-align:center;">SEQUENCER AUDIO-LINK INTERCEPTOR</div>
+                            <p style="font-size:11px; color:#4975a1; text-align:center; line-height:1.4; margin-top:8px;">
+                                警告：骨干时钟重构中...<br>预计脉冲释放在音轨 00:15.50 强袭触达。
+                            </p>
+                            <div class="seq-bar-container" style="margin-top:20px;">
+                                <div class="seq-bar-fill" id="sb-fill"></div>
+                                <div class="seq-bar-text" id="sb-txt">0% SYNCHRONIZING</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="hn-panel" id="netmap-panel">
+                    <div class="hn-header">NET_MAP_TOPOLOGY</div>
+                    <div class="netmap-body">
+                        <div class="node" id="node-pc" style="top:35%; left:25%; display:block;"><div class="node-lbl">Player_Client</div></div>
+                        <div class="node" id="node-marble" style="top:55%; left:65%;"><div class="node-lbl" style="font-weight:bold;">Marble大理石 总部服务器</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hn-panel" id="terminal-panel">
+                <div class="hn-header">SYSTEM_CMD_TERMINAL</div>
+                <div class="terminal-body">
+                    <div id="terminal-rows"></div>
+                    <div style="display:flex; color:#fff; margin-top:5px;">
+                        <span>&gt;&nbsp;</span><span id="cmd-input"></span><span class="blink">_</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="disconnect-layer">
+        <span class="blink">[disconnected]</span>
+    </div>
+
+    <div id="debug-panel">
+        <button id="btn-fast" style="font-size:10px; padding:2px 5px; color:#555; border-color:#555;">⏩ 前进至10.5秒前</button>
+    </div>
+
+    <audio id="music" src="Roller_Mobster.ogg" preload="auto"></audio>
+
+    <script>
+        const audio = document.getElementById('music');
+        const btnStart = document.getElementById('btn-start');
+        const btnFast = document.getElementById('btn-fast');
+
+        btnStart.addEventListener('click', () => {
+            document.getElementById('loader-layer').style.display = 'none';
+            audio.play().catch(() => {});
+            launchTimeline();
+        });
+
+        btnFast.addEventListener('click', () => {
+            document.getElementById('loader-layer').style.display = 'none';
+            audio.currentTime = 10.5; 
+            audio.play();
+            launchTimeline();
+        });
+
+        const CLIMAX_TIME = 15.5;  // 🚨 完美契合 Roller Mobster 的 15.5秒高潮爆炸点
+        let currentRAM = 150;      // 基础内核占用 150MB
+        const MAX_RAM = 720;       // 严格死限 720MB
+        let isTimelineActive = false;
+
+        function launchTimeline() {
+            if(isTimelineActive) return;
+            isTimelineActive = true;
+
+            // Step 1: Brial 验证启动
+            document.getElementById('login-screen').style.display = 'block';
+            setTimeout(() => { brialType('br-user', 'Login: Wang Jun', 'g-text'); }, 400);
+            setTimeout(() => { brialType('br-pass', 'Password: ', 'r-text'); }, 1400);
+            setTimeout(() => { brialType('br-stat', 'Success!', 's-text'); }, 2300);
+
+            // Step 2: 登录进入主系统
+            setTimeout(() => {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('hacknet-os').style.display = 'block';
+                
+                termOut("X-Server GUI Framework Initialized.", 10);
+                termOut("RAM Allocation Manager Active: 720MB Driver loaded.", 120);
+            }, 3200);
+
+            // Step 3: 【左下角】触发：连接 rmk.rmk.rmk.rmk
+            setTimeout(() => {
+                document.getElementById('atk-connect').classList.add('active');
+                termType("connect rmk.rmk.rmk.rmk", () => {
+                    termOut("Handshaking with remote target rmk.rmk.rmk.rmk...", 0);
+                    setTimeout(() => {
+                        document.getElementById('node-marble').style.display = 'block';
+                        initMarbleViewer();
+                        termOut("Connected! Security layers mapped.", 0);
+                    }, 400);
+                });
+            }, 4600);
+
+            // Step 4: 挂载 Sequencer
+            setTimeout(() => {
+                termType("exe Sequencer", () => {
+                    document.getElementById('node-viewer').style.display = 'none';
+                    document.getElementById('sequencer-window').style.display = 'flex';
+                    termOut("Sequencer module hooked into active audio hardware clock.", 0);
+                });
+            }, 6400);
+
+            // Step 5: 工具序列强行砸入 (精算展现内存报错与阻塞等待释放机制)
+            setTimeout(() => {
+                // 8.0秒：注入 WebServerWorm (180MB)
+                setTimeout(() => { executeExploitTool("WebServerWorm.exe", 180, 80, 4000); }, 0);
+                
+                // 8.6秒：注入 FTPBounce (180MB)
+                setTimeout(() => { executeExploitTool("FTPBounce.exe", 180, 21, 3800); }, 600);
+
+                // 9.2秒：注入 TelnetCrack (180MB) -> 此时占用：150(OS) + 180*3 = 690MB。逼近 720MB 极限！
+                setTimeout(() => { executeExploitTool("TelnetCrack.exe", 180, 23, 3600); }, 1200);
+
+                // 9.8秒：🚨 尝试注入 SMTPoverflow -> 此时再加 180MB 就会飚到 870MB，内存不足！
+                setTimeout(() => {
+                    termType("SMTPoverflow 25", () => {
+                        termErr(":: [CRITICAL ERROR] INSUFFICIENT RAM DRIVE CAPACITY ::");
+                        termErr(":: ALLOCATION OF 180MB FAILED. TERMINATE RUNNING PROCESSES FIRST ::");
+                        
+                        // 建立原版守护进程重试机制：等待老工具释放内存后，在 12.6 秒自动补发加载
+                        setTimeout(() => {
+                            termOut("RAM blocks released. Executing deferred overflow payload...", 0);
+                            executeExploitTool("SMTPoverflow.exe", 180, 25, 2600);
+                            setTimeout(() => { executeExploitTool("KBT_PortTest.exe", 180, 104, 2400); }, 400);
+                            setTimeout(() => { executeExploitTool("SQLCrack.exe", 180, 1433, 2200); }, 800);
+                        }, 2600);
+                    });
+                }, 1800);
+
+            }, 8000);
+
+            requestAnimationFrame(trackAudioTimeline);
+        }
+
+        let isTraceTriggered = false;
+        let isFinalSequenceTriggered = false;
+
+        function trackAudioTimeline() {
+            let stamp = audio.currentTime;
+
+            // 前奏期间更新 Sequencer 同步状态
+            if (stamp >= 6.5 && stamp < CLIMAX_TIME) {
+                let pct = ((stamp - 6.5) / (CLIMAX_TIME - 6.5)) * 100;
+                document.getElementById('sb-fill').style.width = pct + '%';
+                document.getElementById('sb-txt').innerText = `SYNCHRONIZING WITH AUDIO WAVELENGTH: ${Math.floor(pct)}%`;
+            }
+
+            // 💥 15.5秒高潮爆发：跳出 GO GO GO，且红线开始往下匀速碾压！
+            if (stamp >= CLIMAX_TIME && !isTraceTriggered) {
+                isTraceTriggered = true;
+                
+                // 还原中上部视窗到节点破港详情
+                document.getElementById('sequencer-window').style.display = 'none';
+                document.getElementById('node-viewer').style.display = 'flex';
+
+                // 突变全局红色过载警报
+                document.body.classList.add('emergency-mode');
+                document.getElementById('node-marble').classList.add('target-glow');
+
+                // 爆发震撼闪烁大字
+                const banner = document.getElementById('gogogo-banner');
+                banner.style.display = 'block';
+                setTimeout(() => { banner.style.display = 'none'; }, 2200);
+
+                termErr("!! DETECTED TRACE INDUCTION - ENTECH COALITION FIREWALL COUNTER-ATTACK !!");
+
+                // 🚨 原版神髓：向下运动的限时红线，走过的地方全变透明红毯 (限时 24 秒安全线碾压到底)
+                let limitDuration = 24; 
+                let startTraceTime = audio.currentTime;
+                let traceClock = setInterval(() => {
+                    let passed = audio.currentTime - startTraceTime;
+                    let percentage = (passed / limitDuration) * 100;
+                    if (percentage >= 100) {
+                        percentage = 100;
+                        clearInterval(traceClock);
+                    }
+                    document.getElementById('trace-overlay').style.height = percentage + '%';
+                }, 40);
+            }
+
+            // 高潮后的黑客高速自动化操作流
+            if (isTraceTriggered && !isFinalSequenceTriggered) {
+                let offset = stamp - CLIMAX_TIME;
+                executePostClimaxHacking(offset);
+            }
+
+            if (!isFinalSequenceTriggered || audio.currentTime < audio.duration) {
+                requestAnimationFrame(trackAudioTimeline);
+            }
+        }
+
+        // 高潮突入后的终极破港与毁灭阶段
+        let hackPhase = 0;
+        function executePostClimaxHacking(offset) {
+            // 所有端口全开（在17.5秒达成），重锤破壳：porthack
+            if (offset > 2.0 && hackPhase === 0) {
+                hackPhase = 1;
+                termType("porthack", () => {
+                    termOut("All target interfaces bypassed. Compiling PortHack injection...", 0);
+                    // 矩阵代码闪烁跑片
+                    for(let i=0; i<12; i++) {
+                        setTimeout(() => {
+                            termOut(`[SYS_BUFFER_0x${Math.random().toString(16).substr(2,5).toUpperCase()}] Overwriting Admin Access Token...`, 0);
+                        }, i * 50);
+                    }
+                    setTimeout(() => {
+                        termOut("===================================================", 0);
+                        termOut("ACCESS PRIVILEGE CHANGED -> ROOT SYSTEM MONARCH ACQUIRED", 20);
+                        termOut("===================================================", 40);
+                        document.getElementById('v-list').innerHTML = `
+                            <div style="text-align:center; padding-top:45px; color:#ff2222; font-size:18px; font-weight:bold; letter-spacing:1px; animation: pulse 0.4s infinite alternate;">
+                                [ ROOT ADMINISTRATIVE PRIVILEGES GRANTED ]
+                            </div>
+                        `;
+                    }, 650);
+                });
+            }
+
+            // 切入核心路径
+            if (offset > 6.0 && hackPhase === 1) {
+                hackPhase = 2;
+                termType("cd home", () => { termOut("Navigating filesystem structure: /home", 0); });
+            }
+            if (offset > 7.5 && hackPhase === 2) {
+                hackPhase = 3;
+                termType("cd 北幽墙壁名单", () => { termOut("Navigating filesystem structure: /home/北幽墙壁名单/", 0); });
+            }
+            if (offset > 9.0 && hackPhase === 3) {
+                hackPhase = 4;
+                termType("ls", () => {
+                    termOut("4 targeted core personnel node-objects discovered:", 0);
+                    termOut("  - 老总  - wnqs0628  - Cv_Calvin  - Cirno_qwa", 40);
+                });
+            }
+
+            // 【左下角】触发：删除数据变亮闪烁，执行灭绝抹除
+            if (offset > 11.2 && hackPhase === 4) {
+                hackPhase = 5;
+                document.getElementById('atk-delete').classList.add('active');
+                termType("rm *", () => {
+                    termOut("Executing forced atomic sector wipe sequence...", 0);
+                    termOut("Erasing file record -> 老总 ...... WIPED", 150);
+                    termOut("Erasing file record -> wnqs0628 ... WIPED", 300);
+                    termOut("Erasing file record -> Cv_Calvin .. WIPED", 450);
+                    termOut("Erasing file record -> Cirno_qwa .. WIPED", 600);
+                    termOut("CRITICAL SUCCESS: ENTECH PERSONNEL DATA COMPLETELY BLANKED.", 750);
+                });
+            }
+
+            // 【左下角】触发：安全快速拔线撤退
+            if (offset > 15.2 && hackPhase === 5) {
+                isFinalSequenceTriggered = true; 
+                document.getElementById('atk-disconnect').classList.add('active');
+                termType("dc", () => {
+                    termOut("Severing tracking proxy connection relay...", 0);
+                    setTimeout(() => {
+                        // 熄灭系统，切入原版全黑 [disconnected]
+                        document.getElementById('hacknet-os').style.display = 'none';
+                        document.getElementById('disconnect-layer').style.display = 'flex';
+                    }, 400);
+                });
+            }
+        }
+
+        // 核心内存机制：分配色块到【左侧】RAM监控区，不足直接抛错
+        function executeExploitTool(name, ramSize, targetPort, duration) {
+            if (currentRAM + ramSize > MAX_RAM) {
+                return; // 防漏判定
+            }
+
+            currentRAM += ramSize;
+            refreshRAMIndicator();
+
+            termType(`${name.replace('.exe','')} ${targetPort}`, () => {
+                const container = document.getElementById('ram-apps-container');
+                const block = document.createElement('div');
+                block.className = 'ram-active-block';
+                block.id = `ram-app-${targetPort}`;
+                block.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                        <span>${name}</span><span>${ramSize}M</span>
+                    </div>
+                    <div class="ram-inner-bar" id="ram-fill-${targetPort}"></div>
+                `;
+                container.appendChild(block);
+
+                let startTime = performance.now();
+                let fillBar = document.getElementById(`ram-fill-${targetPort}`);
+                
+                let progress = setInterval(() => {
+                    let elapsed = performance.now() - startTime;
+                    let pct = (elapsed / duration) * 100;
+                    if(pct >= 100) {
+                        pct = 100;
+                        clearInterval(progress);
+                        
+                        if(document.getElementById(`ram-app-${targetPort}`)) {
+                            block.remove();
+                        }
+                        currentRAM -= ramSize;
+                        refreshRAMIndicator();
+                        
+                        openPortState(targetPort);
+                    }
+                    fillBar.style.width = pct + '%';
+                }, 50);
+            });
+        }
+
+        function refreshRAMIndicator() {
+            document.getElementById('ram-indicator').innerText = `USED: ${currentRAM} MB / ${MAX_RAM} MB`;
+        }
+
+        // 大理石总部核心 6 大防护端口配置
+        const marblePorts = [
+            { num: 80, name: "HTTP WebServer", open: false },
+            { num: 21, name: "FTP Port Bounce", open: false },
+            { num: 23, name: "Telnet Gateway", open: false },
+            { num: 25, name: "SMTP Mail Relay", open: false },
+            { num: 104, name: "KBT Medical Core", open: false },
+            { num: 1433, name: "SQL Database Server", open: false }
+        ];
+
+        function initMarbleViewer() {
+            document.getElementById('v-title').innerText = "Marble大理石 总部服务器";
+            document.getElementById('v-ip').innerText = "IP: rmk.rmk.rmk.rmk";
+            renderPortsHTML();
+        }
+
+        function renderPortsHTML() {
+            const box = document.getElementById('v-list');
+            box.innerHTML = `<div style="margin-bottom:8px; font-weight:bold; color:#4975a1;">Active Target Firewall Security Ports:</div>`;
+            marblePorts.forEach(p => {
+                box.innerHTML += `
+                    <div class="p-row">
+                        <span>Port ${p.num} : ${p.name}</span>
+                        <span class="${p.open ? 'p-open' : 'p-lock'}">${p.open ? '[OPEN]' : '[LOCKED]'}</span>
+                    </div>`;
+            });
+        }
+
+        function openPortState(num) {
+            let match = marblePorts.find(p => p.num === num);
+            if(match) {
+                match.open = true;
+                renderPortsHTML();
+            }
+        }
+
+        // 命令行输出控制器
+        function termType(cmdText, callback) {
+            const input = document.getElementById('cmd-input');
+            input.innerText = "";
+            let i = 0;
+            let timer = setInterval(() => {
+                input.innerText += cmdText.charAt(i);
+                i++;
+                if(i >= cmdText.length) {
+                    clearInterval(timer);
+                    setTimeout(() => {
+                        termOut(`> ${cmdText}`, 0);
+                        input.innerText = "";
+                        if(callback) callback();
+                    }, 100);
+                }
+            }, 25);
+        }
+
+        function termOut(text, delay = 0) {
+            setTimeout(() => {
+                const rows = document.getElementById('terminal-rows');
+                const div = document.createElement('div');
+                div.className = text.startsWith('>') ? 't-in' : 't-out';
+                if(text.includes("!!") || text.includes("CRITICAL") || text.includes("ERROR")) div.className = 't-err';
+                div.innerText = text;
+                rows.appendChild(div);
+                rows.scrollTop = rows.scrollHeight;
+            }, delay);
+        }
+
+        function termErr(text) {
+            termOut(text, 0);
+        }
+
+        function brialType(id, text, cls) {
+            const el = document.getElementById(id);
+            if(cls) el.className = `login-text ${cls}`;
+            let i = 0;
+            let timer = setInterval(() => {
+                el.innerHTML += text.charAt(i);
+                i++;
+                if(i >= text.length) clearInterval(timer);
+            }, 40);
+        }
+    </script>
+</body>
+</html>
