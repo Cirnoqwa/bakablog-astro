@@ -9,8 +9,9 @@ draft: false
 ---
 
 import Graph from '../../../components/Graph.astro';
-import graphData from '/data/Graph/guides_test.json';
+
 import DownloadManager from "@components/DownloadManager.astro"; 
+
 import Board from "src/components/Board.astro";
 
 ---
@@ -108,7 +109,7 @@ import graphData from '/data/Graph/links.json';   // 需要配置 Vite 别名（
 
 <div style="margin: 20px 0;">
   <h3 style="font-size: 14px; margin-bottom: 10px; color: #64748b;">🔗 关系图</h3>
-  <Graph graph="links" id="example" showLabel={false} />
+  <Graph graph="guides_test" id="example" showLabel={false} />
 </div>
 
 ---
