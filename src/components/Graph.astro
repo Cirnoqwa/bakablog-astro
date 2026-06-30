@@ -1,15 +1,15 @@
 ---
-interface Props {
-  data: {
-    categories?: Array<{ name: string }>;
-    nodes: Array<{ id: string; name: string; symbolSize?: number; category?: number; icon?: string; color?: string; info?: string; [key: string]: any }>;
-    links: Array<{ source: string; target: string; value?: string; label?: string; info?: string; color?: string; [key: string]: any }>;
-  };
+export interface Props {
+  data?: any;               
+  graph?: string;            
   id?: string;
   showLabel?: boolean;
 }
 
-const { data, id = 'main', showLabel = true } = Astro.props;
+const { data: propData, graph = "links", id = "main", showLabel = true } = Astro.props;
+
+// 自动去掉 .json 后缀
+const boardName = graph.replace(/\.json$/i, "");
 ---
 
 <div class="mod-graph-container">
@@ -40,7 +40,13 @@ const { data, id = 'main', showLabel = true } = Astro.props;
     <div class="spinner"></div>
     <span>加载关系图中...</span>
   </div>
-  <div id={id} class="echarts-trigger-canvas" data-graph-content={JSON.stringify(data)} data-show-label={showLabel}></div>
+  <div
+    id={id}
+    class="echarts-trigger-canvas"
+    data-board={boardName}
+    data-show-label={showLabel}
+    data-prop-data={propData ? JSON.stringify(propData) : ''}
+  ></div>
 </div>
 
 <script>
@@ -49,351 +55,326 @@ const { data, id = 'main', showLabel = true } = Astro.props;
   import { TooltipComponent, LegendComponent, TitleComponent } from 'echarts/components';
   import { CanvasRenderer } from 'echarts/renderers';
 
-  const chartInstances = new Map<HTMLElement, any>();
-  const labelStates = new Map<string, boolean>();
-
   echarts.use([GraphChart, TooltipComponent, LegendComponent, TitleComponent, CanvasRenderer]);
-  
+
+  const chartInstances = new Map();
+  const labelStates = new Map();
+  const resizeHandlers = new Map();
+
   function isDarkMode() {
     return document.documentElement.classList.contains('dark') || document.documentElement.getAttribute('data-theme') === 'dark';
   }
 
-  const resizeHandlers = new Map<HTMLElement, () => void>();
+  
+  async function renderGraph(container) {
+    const htmlEl = container;
+    const containerId = htmlEl.id;
+    const showLabel = htmlEl.dataset.showLabel !== 'false';
+    const board = htmlEl.dataset.board || 'links';
+    const propDataRaw = htmlEl.dataset.propData;
 
-  function initAllGraphs() {
-    const containers = document.querySelectorAll('.echarts-trigger-canvas');
+    let graphData = null;
+    if (propDataRaw) {
+      try {
+        graphData = JSON.parse(propDataRaw);
+      } catch (e) {
+        console.warn('Invalid propData, falling back to API');
+      }
+    }
+
+    if (!graphData) {
+      try {
+        const res = await fetch(`/api/graph?board=${board}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        graphData = await res.json();
+      } catch (e) {
+        console.error('Failed to load graph data:', e);
+        const placeholder = htmlEl.parentElement?.querySelector('.graph-loading-placeholder');
+        if (placeholder) placeholder.innerHTML = '加载失败，请刷新重试';
+        return;
+      }
+    }
+
+    const placeholder = htmlEl.parentElement?.querySelector('.graph-loading-placeholder');
+    if (placeholder) placeholder.style.display = 'none';
+
+    let myChart = echarts.getInstanceByDom(htmlEl);
+    if (myChart) myChart.dispose();
     const isDark = isDarkMode();
-    
+    myChart = echarts.init(htmlEl, isDark ? 'dark' : undefined);
+    chartInstances.set(htmlEl, myChart);
+
     const themeTextColor = isDark ? '#e2e8f0' : '#1e293b';
     const themeLineColor = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.15)';
     const themeBgColor = isDark ? '#15171c' : '#f8fafc';
 
-    containers.forEach((container) => {
-      const htmlEl = container as HTMLElement;
-      let myChart = echarts.getInstanceByDom(htmlEl);
-      if (myChart) myChart.dispose();
+    const categoryColors = graphData.categories
+      ? graphData.categories.map(c => c.color || '#cbd5e1')
+      : ['#74D1EA', '#39C5BB', '#A0AEC0'];
 
-      myChart = echarts.init(htmlEl, isDark ? 'dark' : undefined);
-      chartInstances.set(htmlEl, myChart);
-
-      const rawData = htmlEl.getAttribute('data-graph-content');
-      if (!rawData) return;
-      const graphData = JSON.parse(rawData);
-      
-      const containerId = htmlEl.id;
-      const initialShowLabel = htmlEl.getAttribute('data-show-label') !== 'false';
-      labelStates.set(containerId, initialShowLabel);
-
-      // 动态颜色提取逻辑
-      const categoryColors = graphData.categories 
-        ? graphData.categories.map((c: any) => c.color || '#cbd5e1') 
-        : ['#74D1EA', '#39C5BB', '#A0AEC0'];
-
-      const nodes = graphData.nodes ? graphData.nodes.map((node: any) => ({
-        id: node.id,
-        name: node.name,
-        symbol: node.icon ? `image://${node.icon}` : 'circle',
-        //木勾盒子大小
-        symbolSize: node.symbolSize || 35, 
-        category: node.category,
-        info: node.info,
-        itemStyle: {
-          color: node.color || undefined, 
-          borderColor: node.color || '#cbd5e1',
-          borderWidth: 1.5,
-          shadowBlur: 6,
-          shadowColor: node.color 
-            ? `color-mix(in srgb, ${node.color} 33%, rgba(0,0,0,0.15))` 
-            : 'rgba(0,0,0,0.15)'
-        },
-        label: { show: initialShowLabel, position: 'bottom', color: themeTextColor, fontSize: 12, distance: 8 }
-      })) : [];
-
-      const edges = graphData.links ? graphData.links.map((link: any) => ({
-        ...link,
-        label: { 
-          show: initialShowLabel && !!(link.value || link.label), 
-          formatter: link.value || link.label, 
-          fontSize: 11, 
-          color: isDark ? '#94a3b8' : '#64748b',
-          distance: 6
-        },
-        lineStyle: { 
-          color: link.color || themeLineColor, 
-          width: 1.5, 
-          curveness: 0 
-        }
-      })) : [];
-
-      const option = {
-        backgroundColor: themeBgColor,
-        color: categoryColors,
-        tooltip: { 
-          trigger: 'item',
-          enterable: true,
-          hideDelay: 100,
-          transitionDuration: 0.2,
-          renderMode: 'html',
-          extraCssText: 'z-index: 1000; pointer-events: auto; max-width: 300px; border-radius: 8px;',
-          formatter: (params: any) => {
-            if (params.dataType === 'edge') return params.data.info || params.data.value || '连接';
-            if (params.dataType === 'node') {
-              return params.data.info 
-                ? `<div style="padding: 8px; pointer-events: auto;">
-                     <strong style="font-size:14px; display:block; margin-bottom:6px;">${params.data.name}</strong>
-                     <div style="border-top:1px solid rgba(128,128,128,0.2); padding-top:6px;">${params.data.info}</div>
-                   </div>` 
-                : `<div style="padding: 6px;"><strong>${params.data.name}</strong></div>`;
-            }
-          }
-        },
-        legend: graphData.categories ? {
-          data: graphData.categories.map((c: any) => c.name),
-          textStyle: { color: themeTextColor },
-          left: '10px',
-          top: '10px'
-        } : undefined,
-        series: [{
-          type: 'graph',
-          layout: 'force',
-          roam: true,
-          draggable: true,
-          nodeScaleRatio: 0.12,
-          //限制缩放范围,缩放后大小变化的限制,改小了就纯SB
-          scaleLimit: { min: 0.2, max: 40 },
-          focusNodeAdjacency: true,
-          animation: true,
-          animationDurationUpdate: 350,
-          animationEasingUpdate: 'cubicOut',
-          layoutAnimation: true,
-          data: nodes,
-          edges: edges,
-          categories: graphData.categories,
-          label: {
-            show: initialShowLabel,
-            fontSize: 12,
-            position: 'bottom',
-            distance: 8
-          },
-          //乐子小盒子速度
-          force: { repulsion: 260, edgeLength: [110, 160], gravity: 0.08, friction: 0.75, layoutAnimation: true }
-        }]
-      };
-
-      myChart.setOption(option);
-
-      const placeholder = htmlEl.parentElement?.querySelector('.graph-loading-placeholder');
-
-       if (placeholder) {
-        (placeholder as HTMLElement).style.display = 'none';
+    const nodes = (graphData.nodes || []).map(node => ({
+      ...node,
+      symbol: node.icon ? `image://${node.icon}` : 'circle',
+      symbolSize: node.symbolSize || 35,
+      category: node.category,
+      itemStyle: {
+        color: node.color || undefined,
+        borderColor: node.color || '#cbd5e1',
+        borderWidth: 1.5,
+        shadowBlur: 6,
+        shadowColor: node.color
+          ? `color-mix(in srgb, ${node.color} 33%, rgba(0,0,0,0.15))`
+          : 'rgba(0,0,0,0.15)'
+      },
+      label: {
+        show: showLabel,
+        position: 'bottom',
+        color: themeTextColor,
+        fontSize: 12,
+        distance: 8
       }
-      
-      myChart.getZr().on('click', (params: any) => {
-        if (!params.target) {
-          myChart!.dispatchAction({ type: 'unfocusNodeAdjacency', seriesIndex: 0 });
-          myChart!.dispatchAction({ type: 'hideTip' });
-        }
-      });
+    }));
 
-      // 背景区域拖动平移支持
-      let isBackgroundDragging = false;
-      let dragLastX = 0;
-      let dragLastY = 0;
+    const edges = (graphData.links || []).map(link => ({
+      ...link,
+      label: {
+        show: showLabel && !!(link.value || link.label),
+        formatter: link.value || link.label,
+        fontSize: 11,
+        color: isDark ? '#94a3b8' : '#64748b',
+        distance: 6
+      },
+      lineStyle: {
+        color: link.color || themeLineColor,
+        width: 1.5,
+        curveness: 0
+      }
+    }));
 
-      myChart.getZr().on('mousedown', (params: any) => {
-        if (!params.target) {
-          isBackgroundDragging = true;
-          const event = params.event;
-          dragLastX = event.offsetX ?? event.zrX ?? 0;
-          dragLastY = event.offsetY ?? event.zrY ?? 0;
-        }
-      });
-
-      myChart.getZr().on('mousemove', (params: any) => {
-        if (!isBackgroundDragging) return;
-        const event = params.event;
-        const x = event.offsetX ?? event.zrX;
-        const y = event.offsetY ?? event.zrY;
-        if (x == null || y == null) return;
-
-        //神秘乐子木勾拖动速度,改慢了霍金,改快了堪比爱泼斯坦找小孩
-        const dx = (x - dragLastX) * 0.2;
-        const dy = (y - dragLastY) * 0.2;
-
-        if (dx || dy) {
-          myChart.dispatchAction({ type: 'graphRoam', seriesIndex: 0, dx, dy });
-          dragLastX = x;
-          dragLastY = y;
-        }
-      });
-
-      myChart.getZr().on('mouseup', () => {
-        isBackgroundDragging = false;
-      });
-      myChart.getZr().on('globalout', () => {
-        isBackgroundDragging = false;
-      });
-
-      htmlEl.addEventListener('wheel', (e: WheelEvent) => {
-        // 检查鼠标是否在图表容器内,不在的话,就直接拉去平壤墙壁
-        e.preventDefault();
-        e.stopPropagation();
-      }, { passive: false });
-
-      // 手机端触摸缩放支持
-      let touchStartDistance = 0;
-      htmlEl.addEventListener('touchstart', (e: TouchEvent) => {
-        if (e.touches.length === 2) {
-          const dx = e.touches[0].clientX - e.touches[1].clientX;
-          const dy = e.touches[0].clientY - e.touches[1].clientY;
-          touchStartDistance = Math.sqrt(dx * dx + dy * dy);
-        }
-      }, { passive: true });
-
-      htmlEl.addEventListener('touchmove', (e: TouchEvent) => {
-        if (e.touches.length === 2 && touchStartDistance > 0) {
-          const dx = e.touches[0].clientX - e.touches[1].clientX;
-          const dy = e.touches[0].clientY - e.touches[1].clientY;
-          const currentDistance = Math.sqrt(dx * dx + dy * dy);
-          const scale = currentDistance / touchStartDistance;
-
-          if (Math.abs(scale - 1) > 0.015) {
-            //乐子触摸缩放速度,-40 到 40 是范围,150 是倍数,都改小会更平缓,因为又慢又sb
-            const deltaY = Math.max(20, Math.min(20, Math.round((1 - scale) * 125)));
-            const wheelEvent = new WheelEvent('wheel', {
-              deltaY,
-              clientX: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-              clientY: (e.touches[0].clientY + e.touches[1].clientY) / 2,
-              bubbles: true,
-              cancelable: true,
-              view: window
-            });
-            htmlEl.querySelector('canvas')?.dispatchEvent(wheelEvent);
-            touchStartDistance = currentDistance;
+    const option = {
+      backgroundColor: themeBgColor,
+      color: categoryColors,
+      tooltip: {
+        trigger: 'item',
+        enterable: true,
+        hideDelay: 100,
+        transitionDuration: 0.2,
+        renderMode: 'html',
+        extraCssText: 'z-index: 1000; pointer-events: auto; max-width: 300px; border-radius: 8px;',
+        formatter: params => {
+          if (params.dataType === 'edge') return params.data.info || params.data.value || '连接';
+          if (params.dataType === 'node') {
+            return params.data.info
+              ? `<div style="padding: 8px; pointer-events: auto;">
+                   <strong style="font-size:14px; display:block; margin-bottom:6px;">${params.data.name}</strong>
+                   <div style="border-top:1px solid rgba(128,128,128,0.2); padding-top:6px;">${params.data.info}</div>
+                 </div>`
+              : `<div style="padding: 6px;"><strong>${params.data.name}</strong></div>`;
           }
         }
-      }, { passive: true });
+      },
+      legend: graphData.categories
+        ? {
+            data: graphData.categories.map(c => c.name),
+            textStyle: { color: themeTextColor },
+            left: '10px',
+            top: '10px'
+          }
+        : undefined,
+      series: [{
+        type: 'graph',
+        layout: 'force',
+        roam: true,
+        draggable: true,
+        nodeScaleRatio: 0.12,
+        scaleLimit: { min: 0.2, max: 40 },
+        focusNodeAdjacency: true,
+        animation: true,
+        animationDurationUpdate: 350,
+        animationEasingUpdate: 'cubicOut',
+        layoutAnimation: true,
+        data: nodes,
+        edges: edges,
+        categories: graphData.categories,
+        label: {
+          show: showLabel,
+          fontSize: 12,
+          position: 'bottom',
+          distance: 8
+        },
+        force: {
+          repulsion: 260,
+          edgeLength: [110, 160],
+          gravity: 0.08,
+          friction: 0.75,
+          layoutAnimation: true
+        }
+      }]
+    };
 
-      const handler = () => myChart?.resize();
-      window.addEventListener('resize', handler);
-      resizeHandlers.set(htmlEl, handler);
+    myChart.setOption(option);
+
+    
+    myChart.getZr().on('click', (params) => {
+      if (!params.target) {
+        myChart.dispatchAction({ type: 'unfocusNodeAdjacency', seriesIndex: 0 });
+        myChart.dispatchAction({ type: 'hideTip' });
+      }
+    });
+
+    let isBackgroundDragging = false;
+    let dragLastX = 0, dragLastY = 0;
+    myChart.getZr().on('mousedown', (params) => {
+      if (!params.target) {
+        isBackgroundDragging = true;
+        const event = params.event;
+        dragLastX = event.offsetX ?? event.zrX ?? 0;
+        dragLastY = event.offsetY ?? event.zrY ?? 0;
+      }
+    });
+    myChart.getZr().on('mousemove', (params) => {
+      if (!isBackgroundDragging) return;
+      const event = params.event;
+      const x = event.offsetX ?? event.zrX;
+      const y = event.offsetY ?? event.zrY;
+      if (x == null || y == null) return;
+      const dx = (x - dragLastX) * 0.2;
+      const dy = (y - dragLastY) * 0.2;
+      if (dx || dy) {
+        myChart.dispatchAction({ type: 'graphRoam', seriesIndex: 0, dx, dy });
+        dragLastX = x;
+        dragLastY = y;
+      }
+    });
+    myChart.getZr().on('mouseup', () => { isBackgroundDragging = false; });
+    myChart.getZr().on('globalout', () => { isBackgroundDragging = false; });
+
+    htmlEl.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    }, { passive: false });
+
+    let touchStartDistance = 0;
+    htmlEl.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        touchStartDistance = Math.sqrt(dx * dx + dy * dy);
+      }
+    }, { passive: true });
+    htmlEl.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2 && touchStartDistance > 0) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const currentDistance = Math.sqrt(dx * dx + dy * dy);
+        const scale = currentDistance / touchStartDistance;
+        if (Math.abs(scale - 1) > 0.015) {
+          const deltaY = Math.max(20, Math.min(20, Math.round((1 - scale) * 125)));
+          const wheelEvent = new WheelEvent('wheel', {
+            deltaY,
+            clientX: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+            clientY: (e.touches[0].clientY + e.touches[1].clientY) / 2,
+            bubbles: true,
+            cancelable: true,
+            view: window
+          });
+          htmlEl.querySelector('canvas')?.dispatchEvent(wheelEvent);
+          touchStartDistance = currentDistance;
+        }
+      }
+    }, { passive: true });
+
+    const handler = () => myChart?.resize();
+    window.addEventListener('resize', handler);
+    resizeHandlers.set(htmlEl, handler);
+
+    labelStates.set(containerId, showLabel);
+  }
+
+  
+  async function initAllGraphs() {
+    const containers = document.querySelectorAll('.echarts-trigger-canvas');
+    for (const el of containers) {
+      await renderGraph(el);
+    }
+    document.querySelectorAll('.label-toggle-btn').forEach(btn => {
+      const targetId = btn.getAttribute('data-target');
+      if (targetId && labelStates.has(targetId)) {
+        const isActive = labelStates.get(targetId);
+        if (isActive) btn.classList.add('active');
+        else btn.classList.remove('active');
+      }
     });
   }
 
-  function toggleLabels(containerId: string) {
-  const currentState = labelStates.get(containerId) ?? true;
-  const newState = !currentState;
-  labelStates.set(containerId, newState);
+  
+  function toggleLabels(containerId) {
+    const currentState = labelStates.get(containerId) ?? true;
+    const newState = !currentState;
+    labelStates.set(containerId, newState);
 
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  const chart = chartInstances.get(container);
-  if (!chart) return;
-
-  const currentOption = chart.getOption();
-  if (currentOption.series && currentOption.series[0]) {
-    const series = currentOption.series[0];
-    series.label.show = newState;
-    if (series.data) {
-      series.data.forEach((node: any) => {
-        if (node.label) node.label.show = newState;
-      });
-    }
-    if (series.edges) {
-      series.edges.forEach((edge: any) => {
-        if (edge.label) edge.label.show = newState && !!(edge.value || edge.label.formatter);
-      });
-    }
-    chart.setOption(currentOption);
-  }
-
-  // 显式管理 active 类名
-  const button = document.querySelector(
-    `.label-toggle-btn[data-target="${containerId}"]`
-  ) as HTMLElement;
-  if (button) {
-    if (newState) {
-      button.classList.add('active');
-    } else {
-      button.classList.remove('active');
-    }  
-  }   
-}     
-
-  function handleZoom(containerId: string, direction: 'in' | 'out') {
     const container = document.getElementById(containerId);
     if (!container) return;
-    
     const chart = chartInstances.get(container);
     if (!chart) return;
 
     const currentOption = chart.getOption();
-    if (!currentOption.series || !currentOption.series[0]) return;
-
-    const series = currentOption.series[0];
-    const zoomFactor = 1.12;
-    
-    // 获取当前的缩放和偏移
-    let currentZoom = 1;
-    let currentX = 0;
-    let currentY = 0;
-
-    if (series.roamControlMode && series.view) {
-      currentZoom = series.view.zoom || 1;
-      currentX = series.view.x || 0;
-      currentY = series.view.y || 0;
+    if (currentOption.series && currentOption.series[0]) {
+      const series = currentOption.series[0];
+      series.label.show = newState;
+      if (series.data) {
+        series.data.forEach(node => {
+          if (node.label) node.label.show = newState;
+        });
+      }
+      if (series.edges) {
+        series.edges.forEach(edge => {
+          if (edge.label) edge.label.show = newState && !!(edge.value || edge.label.formatter);
+        });
+      }
+      chart.setOption(currentOption);
     }
 
-    const newZoom = direction === 'in' ? currentZoom * zoomFactor : currentZoom / zoomFactor;
+    const button = document.querySelector(`.label-toggle-btn[data-target="${containerId}"]`);
+    if (button) {
+      if (newState) button.classList.add('active');
+      else button.classList.remove('active');
+    }
+  }
+  
+  function handleZoom(containerId, direction) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const chart = chartInstances.get(container);
+    if (!chart) return;
 
-    const canvasElement = container.querySelector('canvas') as HTMLCanvasElement;
+    const canvasElement = container.querySelector('canvas');
     if (canvasElement) {
       const rect = canvasElement.getBoundingClientRect();
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
-
-      // 模拟滚轮,in为上滚缩小deltaY，out为下滚放大deltaY
+      const deltaY = direction === 'in' ? 100 : -100;
       const wheelEvent = new WheelEvent('wheel', {
-        //野鸡按钮缩放速度,谁用谁就得受着,in是放大,所以deltaY应该是负的,out是缩小,所以deltaY应该是正的,再用能用成大SB
-        deltaY: direction === 'in' ? 100 : -100,
+        deltaY,
         clientX: rect.left + centerX,
         clientY: rect.top + centerY,
         bubbles: true,
         cancelable: true,
         view: window
       });
-
       canvasElement.dispatchEvent(wheelEvent);
     }
   }
 
-  function initializeButtons() {
-    const buttons = document.querySelectorAll('.label-toggle-btn');
-    buttons.forEach((btn) => {
-      const containerId = btn.getAttribute('data-target');
-      if (containerId && labelStates.has(containerId)) {
-        //const isActive = labelStates.get(containerId);
-        const isActive = labelStates.get(containerId) ?? true;
-        if (isActive) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      }
-    });
-  }
-
-  document.addEventListener('click', (e: Event) => {
-    const target = e.target as HTMLElement;
-    const event = e as any;
-    
-    const labelBtn = target.closest('.label-toggle-btn');
+ 
+  document.addEventListener('click', (e) => {
+    const target = e.target;
+    const labelBtn = target.closest?.('.label-toggle-btn');
     if (labelBtn) {
-      event.stopPropagation();
+      e.stopPropagation();
       const containerId = labelBtn.getAttribute('data-target');
       if (containerId) {
         toggleLabels(containerId);
-        // 隐藏 tooltip
         const container = document.getElementById(containerId);
         if (container) {
           const chart = chartInstances.get(container);
@@ -403,13 +384,12 @@ const { data, id = 'main', showLabel = true } = Astro.props;
       return;
     }
 
-    const zoomInBtn = target.closest('.zoom-in-btn');
+    const zoomInBtn = target.closest?.('.zoom-in-btn');
     if (zoomInBtn) {
-      event.stopPropagation();
+      e.stopPropagation();
       const containerId = zoomInBtn.getAttribute('data-target');
       if (containerId) {
         handleZoom(containerId, 'in');
-        // 隐藏 tooltip
         const container = document.getElementById(containerId);
         if (container) {
           const chart = chartInstances.get(container);
@@ -419,13 +399,12 @@ const { data, id = 'main', showLabel = true } = Astro.props;
       return;
     }
 
-    const zoomOutBtn = target.closest('.zoom-out-btn');
+    const zoomOutBtn = target.closest?.('.zoom-out-btn');
     if (zoomOutBtn) {
-      event.stopPropagation();
+      e.stopPropagation();
       const containerId = zoomOutBtn.getAttribute('data-target');
       if (containerId) {
         handleZoom(containerId, 'out');
-        // 隐藏 tooltip
         const container = document.getElementById(containerId);
         if (container) {
           const chart = chartInstances.get(container);
@@ -436,28 +415,20 @@ const { data, id = 'main', showLabel = true } = Astro.props;
     }
   }, true);
 
+  
   document.addEventListener('astro:page-load', () => {
     initAllGraphs();
-    setTimeout(initializeButtons, 100);
   });
-  
+
   initAllGraphs();
-  setTimeout(initializeButtons, 100);
 
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.attributeName === 'class' || mutation.attributeName === 'data-theme') {
-        initAllGraphs();
-        setTimeout(initializeButtons, 100);
-      }
-    });
+  const observer = new MutationObserver(() => {
+    initAllGraphs();
   });
-
   observer.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['class', 'data-theme']
   });
-
 </script>
 
 <style>
@@ -514,6 +485,6 @@ const { data, id = 'main', showLabel = true } = Astro.props;
   @media (max-width: 640px) {
     .graph-controls { left: 10px !important; bottom: 10px !important; top: auto !important; right: auto !important; gap: 10px !important; flex-direction: column; }
     .zoom-btn, .label-toggle-btn { width: 40px; }
-    .label-toggle-btn span { display: none !important; } /* 仅隐藏文字，图标保留 */
+    .label-toggle-btn span { display: none !important; }
   }
 </style>

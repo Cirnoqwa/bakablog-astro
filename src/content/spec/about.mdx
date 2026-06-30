@@ -6,7 +6,6 @@ draft: false
 ---
 
 import Graph from '../../components/Graph.astro';
-import graphData from '/data/Graph/links.json';
 
 :::note
 
@@ -63,7 +62,7 @@ import graphData from '/data/Graph/links.json';
 
 <div style="margin: 20px 0;">
   <h3 style="font-size: 14px; margin-bottom: 10px; color: #64748b;">🔗 关系图</h3>
-  <Graph data={graphData} id="links" showLabel={true} />
+  <Graph graph="links" id="links" showLabel={true} />
 </div>
 
 ---

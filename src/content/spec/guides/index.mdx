@@ -13,21 +13,46 @@ import graphData from '/data/Graph/guides_test.json';
 import DownloadManager from "@components/DownloadManager.astro"; 
 import Board from "src/components/Board.astro";
 
-<mark style="background-color:#FFB6C1;padding:4px 10px;border-radius:6px 6px 6px 6px;color:white;font-weight:bold;">一、使用关系图</mark>
-:::note
-你可以
-```
-//写在yaml外面,切忌写里面(使用.mdx文件撰写import语句)
-import Graph from '../../components/Graph.astro';
-//json选择你所用的位置
-import graphData from '/data/Graph/links.json';
+---
 
-//写在正文部分 注意一篇文章内id不要重复
-<Graph data={graphData} id="links" showLabel={true} />
-//showLabel可以不写,布尔值
+<mark style="background-color:#FFB6C1;padding:4px 10px;border-radius:6px 6px 6px 6px;color:white;font-weight:bold;">一、使用关系图</mark>
+
+:::note
+**两种使用方式（任选其一）**
+
+**方式一（推荐）：通过 `graph` 属性自动加载数据**
+```mdx
+// 在 .mdx 文件顶部导入组件
+import Graph from '../../components/Graph.astro';
+
+// 在正文任意位置使用，graph 指定 JSON 文件名（自动去 .json）
+<Graph graph="links" id="myGraph" showLabel={true} />
 ```
-json格式如:
+- `graph` 属性值对应 `public/data/Graph/` 目录下的 JSON 文件（不含 `.json` 后缀，带也行）。
+- 组件会在客户端自动请求 `/api/graph?board=links` 获取数据，无需手动 `import`，彻底解决构建路径问题。
+
+**方式二（兼容旧版）：通过 `data` 属性传入数据**
+```mdx
+import Graph from '../../components/Graph.astro';
+import graphData from '/data/Graph/links.json';   // 需要配置 Vite 别名（不推荐）
+
+<Graph data={graphData} id="links" showLabel={false} />
 ```
+> 旧方式需自行配置 Vite 别名将 `/data` 映射到 `public/data`，**新方式无需任何配置**，更简单可靠。
+
+**参数说明**
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `graph` | `string` | `'links'` | JSON 文件名（自动去 `.json`），组件会调用 `/api/graph?board=xxx` 加载 |
+| `data` | `object` | – | 直接传入数据对象，若同时提供 `graph` 和 `data`，优先使用 `data` |
+| `id` | `string` | `'main'` | 容器 ID，同一页面多个图表需唯一 |
+| `showLabel` | `boolean` | `true` | 是否默认显示节点/边标签 |
+
+---
+
+**JSON 数据格式**
+将关系图数据保存在 `public/data/Graph/` 目录下，例如 `links.json`，格式如下：
+```json
 {
   "categories": [
     { "name": "根", "color": "#74D1EA" },
@@ -52,116 +77,48 @@ json格式如:
       "color": "#39C5BB",
       "icon": "/Graph/links/marblemc.png",
       "info": "Romarku开发。<br/><a href='https://marblemc.cn' target='_blank'>点击访问</a>"
-    },
-    { 
-      "id": "brial", 
-      "name": "brial.cn", 
-      "symbolSize": 45, 
-      "category": 1,
-      "color": "#39C5BB",
-      "icon": "/Graph/links/brial.jpg",
-      "info": "布瑞尔黑科技站点。布瑞尔老总开发。<br/><a href='https://brial.cn' target='_blank'>点击访问</a>"
-    },
-    { 
-      "id": "atomforge", 
-      "name": "Atomfor.ge", 
-      "symbolSize": 45, 
-      "category": 1,
-      "color": "#39C5BB",
-      "icon": "/Graph/links/atom.jpg",
-      "info": "AtomForge 服务器状态监视器。<br/><a href='https://atomfor.ge' target='_blank'>点击访问</a>"
-    },
-    { 
-      "id": "jd", 
-      "name": "wnqs0628/KingDingPI", 
-      "symbolSize": 45, 
-      "category": 1,
-      "color": "#39C5BB",
-      "icon": "/Graph/links/e9.jpg",
-      "info": "wnqs0628制作的黑科技鸡丁派。<br/>源码: <a href='https://github.com/wnqs0628/KingDingPI' target='_blank'>点击访问</a>"
-    },
-    { 
-      "id": "scfdev", 
-      "name": "生存斧DEV", 
-      "symbolSize": 35, 
-      "category": 2,
-      "color": "#A0AEC0",
-      "info": "生存斧服务器。<br/><a href='https://www.axe.ink' target='_blank'>点击访问</a>"
-    },
-    { 
-      "id": "scaxe", 
-      "name": "SCAXE | 猫公社", 
-      "symbolSize": 35, 
-      "category": 2,
-      "color": "#A0AEC0",
-      "info": "SCAXE 猫公社社区。<br/><a href='https://www.catcommune.cn' target='_blank'>点击访问</a>"
-    },
-    { 
-      "id": "sbcmd", 
-      "name": "讨伐爱玩电脑的CMD", 
-      "symbolSize": 45, 
-      "category": 1,
-      "icon": "/Graph/links/anticmd.png",
-      "color": "#39C5BB",
-      "info": "讨伐CMD的网站<br/><a href='https://cmd.kingpop.top' target='_blank'>点击访问</a>"
     }
   ],
   "links": [
-    { "source": "self", "target": "marblemc", "value": "友情链接", "info":"么么哒,Romarku" },
-    { "source": "self", "target": "brial", "value": "友情链接" },
-    { "source": "self", "target": "atomforge", "value": "友情链接", "color": "#74D1EA", "info":"联通皮古拉" },
-    { "source": "self", "target": "jd", "value": "友情链接", "color": "yellow", "info":"黑科技鸡丁派" },
-    { "source": "brial", "target": "jd", "value": "友情链接", "color": "black", "info":"黑科技鸡丁派" },
-    { "source": "self", "target": "sbcmd", "value": "友情链接", "color": "red", "info":"专业讨伐爱玩电脑的CMD" },
-    { "source": "marblemc", "target": "scfdev", "value": "子友情链接" },
-    { "source": "marblemc", "target": "scaxe", "value": "子友情链接" }
+    { "source": "self", "target": "marblemc", "value": "友情链接", "info": "么么哒,Romarku" },
+    { "source": "self", "target": "brial", "value": "友情链接", "color": "#74D1EA" }
   ]
 }
 ```
-- categories -> color: 设置各个图例定义的颜色
-- nodes -> id: 节点的唯一身份证（必须唯一，用于连线绑定）。
-- nodes -> symbolSize: 圆点大小。数值越大点越大。
-- nodes -> icon: 填入图片路径（如 /img/logo.png），圆点就会变成该小图标！
-- nodes/links -> color: 设置 节点/线 的颜色，支持 颜色单词、十六进制、RGB 和 RGBA、HSL 和 HSLA ，如果为图片节点，则会勾勒节点
-- nodes -> category: 填数字（从 0 开始），对应上面 categories 数组的下标。
-- links -> source 与 target: 分别填连线起点和终点节点的 id。
-- links -> value / label: 线上要显示的文字。不填线就是纯净无字的。
-- nodes/links -> info: 填入详情介绍，留空则不显示
-:::
 
->如:<br />
+**字段说明**
+- `categories`：分类数组，`color` 用于图例和节点默认颜色（可选）。
+- `nodes`：节点数组。
+  - `id`：**必须**，节点唯一标识。
+  - `name`：显示名称。
+  - `symbolSize`：圆点大小（数值越大越大）。
+  - `category`：数字，对应 `categories` 的下标（从 0 开始）。
+  - `icon`：图片 URL（如 `/img/logo.png`），节点将显示为图片。
+  - `color`：节点颜色（支持 CSS 颜色值）。
+  - `info`：悬浮提示（支持 HTML）。
+- `links`：边数组。
+  - `source` / `target`：节点的 `id`。
+  - `value` / `label`：边上显示的文字。
+  - `color`：线条颜色。
+  - `info`：悬浮提示（支持 HTML）。
+
+---
+
+**示例**
 
 <div style="margin: 20px 0;">
   <h3 style="font-size: 14px; margin-bottom: 10px; color: #64748b;">🔗 关系图</h3>
-  <Graph data={graphData} id="links" showLabel={false} />
+  <Graph graph="links" id="example" showLabel={false} />
 </div>
 
-:::note
-## Graph 组件新增功能 
+---
 
-- **字体显示开关**：支持 `showLabel` 参数控制标签显示（默认 `true`）
-- **文字随缩放缩放**：文字会跟随关系图缩放而自动调整大小
-- **平滑缩放**：优化了缩放参数，使缩放更加流畅
+**更新说明**
+- **新版 `graph` 属性**：无需 `import` 数据，组件自动请求 `/api/graph`，彻底消除构建路径问题。
+- **完整交互保留**：缩放、拖拽、标签切换、深色/浅色主题自适应、触摸支持，所有功能与旧版一致。
+- **兼容性**：同时保留 `data` 属性，旧代码无需修改，但推荐迁移到 `graph` 方式。
 
-**使用示例：**
-```jsx
-// 显示标签（默认）
-<Graph data={graphData} id="test" showLabel={true} />
-
-// 隐藏标签
-<Graph data={graphData} id="test" showLabel={false} />
-```
-
-**Astro组件源码 (src/components/Graph.astro) - 已更新**
-
-完整的最新源码已发布，包含以下改进：
-- 右上角新增"标签"按钮，可实时切换显示/隐藏
-- 节点和边的文字会自动随关系图缩放而缩放（`roam: true` + 仿射变换）
-- 降低 `nodeScaleRatio` 为 0.5，实现平滑缩放效果
-- 支持深色/浅色主题的按钮样式
-- 实时更新 label 状态，不影响已有数据
-
-详见 GitHub: [Graph.astro 最新版本](https://github.com/Cirnoqwa/bakablog-astro/blob/main/src/components/Graph.astro)
+> 如有疑问，请参考 [Graph.astro 源码](https://github.com/Cirnoqwa/bakablog-astro/blob/main/src/components/Graph.astro) 或联系维护者。
 :::
 
 ---
