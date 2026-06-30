@@ -1,0 +1,224 @@
+---
+export interface Props {
+  board: string;      
+  sort?: "votes-desc" | "votes-asc" | "alpha-asc" | "alpha-desc" | "date-asc" | "date-desc";
+}
+
+const { board, sort = "votes-desc" } = Astro.props;
+---
+
+<div
+  class="board-container card-base p-6 mb-4 rounded-3xl bg-[var(--card-bg)] transition-all"
+  data-board={board}
+  data-default-sort={sort}
+>
+  <h2 class="board-title text-2xl font-bold mb-4 text-[var(--btn-content)]" id="board-title">加载中...</h2>
+  
+  <div class="board-controls flex items-center gap-2 mb-4 text-sm text-black/50 dark:text-white/50">
+    <label for="sort-select">排序：</label>
+    <select id="sort-select" class="bg-[var(--btn-regular-bg)] border border-black/10 dark:border-white/10 rounded-lg px-2 py-1 text-[var(--btn-content)]">
+      <option value="votes-desc">票数 ↓</option>
+      <option value="votes-asc">票数 ↑</option>
+      <option value="alpha-asc">名称 A-Z</option>
+      <option value="alpha-desc">名称 Z-A</option>
+      <option value="date-desc">最新在前</option>
+      <option value="date-asc">最早在前</option>
+    </select>
+  </div>
+
+  <ul id="board-list" class="board-list divide-y divide-black/5 dark:divide-white/5 mb-6"></ul>
+
+  <div class="add-item flex gap-2 items-center">
+    <input 
+      type="text" 
+      id="new-item-title" 
+      placeholder="输入新项目名称" 
+      class="flex-1 bg-[var(--btn-regular-bg)] border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-[var(--btn-content)] focus:outline-none focus:border-[var(--primary)]"
+    />
+    <button id="add-item-btn" class="btn-regular px-4 py-2 text-sm font-medium rounded-xl bg-[var(--primary)] text-white hover:opacity-90 transition">
+      添加
+    </button>
+  </div>
+  <div id="message" class="text-xs mt-2 h-4 transition-all"></div>
+</div>
+
+<style>
+  .board-list :global(li) {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+  }
+  .board-list :global(.item-avatar) {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  .board-list :global(.dot) {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .board-list :global(.item-info) {
+    flex: 1;
+  }
+  .board-list :global(.vote-btn) {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    background: var(--btn-regular-bg);
+    color: var(--btn-content);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.2s;
+  }
+  :global(.dark) .board-list :global(.vote-btn) {
+    border-color: rgba(255,255,255,0.05);
+  }
+  .board-list :global(.vote-btn:hover) {
+    background: var(--primary);
+    color: white;
+  }
+</style>
+
+<script>
+  function initBoard() {
+    const container = document.querySelector(".board-container") as HTMLElement;
+    if (!container) return; // 确保当前页面有这个组件才执行
+
+    const board = container.dataset.board!;
+    const defaultSort = container.dataset.defaultSort!;
+    const API_BASE = "/api/ranking";
+
+    let currentSort = defaultSort;
+    const sortSelect = container.querySelector("#sort-select") as HTMLSelectElement;
+    if (sortSelect) sortSelect.value = defaultSort;
+
+    let boardConfig = { title: "", showAvatar: false, defaultDotColor: "#d3d3d3" };
+
+    async function fetchList(sort: string) {
+      try {
+        const res = await fetch(`${API_BASE}?board=${board}&sort=${sort}`);
+        return await res.json();
+      } catch (e) {
+        console.error("Fetch board error:", e);
+        return { config: {}, items: [] };
+      }
+    }
+
+    async function renderList() {
+      const { config, items } = await fetchList(currentSort);
+      boardConfig = config;
+      
+      const titleEl = container.querySelector("#board-title");
+      if (titleEl) titleEl.textContent = config.title || board;
+
+      const list = container.querySelector("#board-list");
+      if (!list) return;
+      list.innerHTML = "";
+
+      if (!items || items.length === 0) {
+        list.innerHTML = `<li class="text-black/40 dark:text-white/40 text-sm justify-center py-4">暂无数据，快来添加第一条吧！</li>`;
+      } else {
+        items.forEach((item: any) => {
+          const li = document.createElement("li");
+
+          let avatarHtml = "";
+          if (config.showAvatar && item.avatar) {
+            avatarHtml = `<img src="/Board/${board}/${item.avatar}" class="item-avatar" alt="${escapeHtml(item.title)}" onerror="this.style.display='none'"/>`;
+          } else {
+            const dotColor = item.dotColor || config.defaultDotColor || "#d3d3d3";
+            avatarHtml = `<span class="dot" style="background-color: ${dotColor};"></span>`;
+          }
+
+          li.innerHTML = `
+            ${avatarHtml}
+            <div class="item-info">
+              <span class="font-medium text-[var(--btn-content)]">${escapeHtml(item.title)}</span>
+              <span class="text-xs opacity-50 ml-2">(${item.votes} 获赞)</span>
+            </div>
+            <div class="vote-area">
+              <button class="vote-btn" data-id="${item.id}">👍 赞同</button>
+            </div>
+          `;
+          list.appendChild(li);
+        });
+      }
+
+      
+      list.querySelectorAll(".vote-btn").forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+          const id = (e.currentTarget as HTMLButtonElement).dataset.id;
+          const res = await fetch(API_BASE, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ board, action: "vote", id }),
+          });
+          if (res.ok) {
+            await renderList();
+            showMessage("投票成功！", "text-green-500");
+          } else {
+            const err = await res.json();
+            showMessage(err.error || "投票失败", "text-red-500");
+          }
+        });
+      });
+    }
+
+    function escapeHtml(text: string) {
+      return text.replace(/[&<>"]/g, (ch) => {
+        const map: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
+        return map[ch];
+      });
+    }
+
+    function showMessage(text: string, colorClass: string) {
+      const msg = container.querySelector("#message") as HTMLElement;
+      if (!msg) return;
+      msg.textContent = text;
+      msg.className = `text-xs mt-2 h-4 transition-all ${colorClass}`;
+      setTimeout(() => {
+        msg.textContent = "";
+      }, 3000);
+    }
+
+    if (sortSelect) {
+      sortSelect.addEventListener("change", () => {
+        currentSort = sortSelect.value;
+        renderList();
+      });
+    }
+
+    const addBtn = container.querySelector("#add-item-btn");
+    const input = container.querySelector("#new-item-title") as HTMLInputElement;
+
+    if (addBtn && input) {
+      addBtn.addEventListener("click", async () => {
+        const title = input.value.trim();
+        if (!title) {
+          showMessage("请输入项目名称", "text-red-500");
+          return;
+        }
+        const res = await fetch(API_BASE, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ board, action: "add", title }),
+        });
+        if (res.ok) {
+          input.value = "";
+          await renderList();
+          showMessage("添加成功！", "text-green-500");
+        } else {
+          const err = await res.json();
+          showMessage(err.error || "添加失败", "text-red-500");
+        }
+      });
+    }
+
+    renderList();
+  }
+
+  document.addEventListener("astro:page-load", initBoard);
+</script>

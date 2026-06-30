@@ -9,8 +9,9 @@ draft: false
 ---
 
 import Graph from '../../../components/Graph.astro';
-import graphData from '../../../data/Graph/guides_test.json';
+import graphData from '/data/Graph/guides_test.json';
 import DownloadManager from "@components/DownloadManager.astro"; 
+import Board from "src/components/Board.astro";
 
 <mark style="background-color:#FFB6C1;padding:4px 10px;border-radius:6px 6px 6px 6px;color:white;font-weight:bold;">一、使用关系图</mark>
 :::note
@@ -19,7 +20,7 @@ import DownloadManager from "@components/DownloadManager.astro";
 //写在yaml外面,切忌写里面(使用.mdx文件撰写import语句)
 import Graph from '../../components/Graph.astro';
 //json选择你所用的位置
-import graphData from '../../data/Graph/links.json';
+import graphData from '/data/Graph/links.json';
 
 //写在正文部分 注意一篇文章内id不要重复
 <Graph data={graphData} id="links" showLabel={true} />
@@ -292,6 +293,112 @@ import DownloadManager from "@components/DownloadManager.astro";
 例如: <br />
 <DownloadManager  showSize={true}  showTrack={false} />
 :::
+
+---
+
+<mark style="background-color:#FFB6C1;padding:4px 10px;border-radius:6px 6px 6px 6px;color:white;font-weight:bold;">五、Board 组件快速使用手册</mark><br /> 
+
+:::top
+### 引用组件
+在 `.astro` 页面中引入并引用：
+```astro
+
+import Board from "src/components/Board.astro"; //引入
+
+<Board board="th.json" sort="votes-desc" /> //使用排行榜
+```
+:::
+
+:::important
+### 修改引用值
+- **`board`**：对应 `src/data/Board/` 下的 JSON 文件名（可带 `.json` 后缀，也可不带）。修改此值可切换不同榜单。
+- **`sort`**：默认排序方式，支持以下值：
+  - `votes-desc`（票数高→低，**默认**）
+  - `votes-asc`（票数低→高）
+  - `alpha-asc`（名称 A→Z）
+  - `alpha-desc`（名称 Z→A）
+  - `date-desc`（最新在前）
+  - `date-asc`（最早在前）
+:::
+
+### JSON 数据格式
+每个榜单一个 JSON 文件，存放在 `src/data/Board/`，结构如下：
+
+```json
+{
+  "title": "东方Project人气角色排行榜",
+  "showAvatar": true,
+  "defaultDotColor": "#FFB6C1",
+  "items": [
+    {
+      "id": "1a2b3",
+      "title": "博丽灵梦",
+      "votes": 1024,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "ips": [],
+      "avatar": "reimu.jpg",
+      "dotColor": ""
+    },
+    {
+      "id": "4c5d6",
+      "title": "雾雨魔理沙",
+      "votes": 987,
+      "createdAt": "2025-01-02T00:00:00Z",
+      "ips": [],
+      "avatar": "marisa.jpg",
+      "dotColor": ""
+    },
+    {
+      "id": "7e8f9",
+      "title": "十六夜咲夜",
+      "votes": 856,
+      "createdAt": "2025-01-03T00:00:00Z",
+      "ips": [],
+      "avatar": "",
+      "dotColor": "#C0C0C0"
+    },
+    {
+      "id": "a1b2c",
+      "title": "蕾米莉亚·斯卡蕾特",
+      "votes": 812,
+      "createdAt": "2025-01-04T00:00:00Z",
+      "ips": [],
+      "avatar": "",
+      "dotColor": "#DC143C"
+    }
+  ]
+}
+```
+:::important
+**字段说明：**
+- `title`：榜单标题（可选）
+- `showAvatar`：是否显示头像（`true`/`false`）
+- `defaultDotColor`：默认圆点颜色（CSS 颜色，无头像时使用）
+- `items`：榜单项目数组，每个项目需包含：
+  - `id`, `title`, `votes`, `createdAt`, `ips`（系统维护）
+  - `avatar`：头像文件名，需放在 `public/Board/{board}/` 下
+  - `dotColor`：该项目专属圆点颜色，优先级高于默认色
+:::
+
+:::important
+如果想创建个新json表,初始内容可以为:
+```json
+{
+  "title": "我的榜单",
+  "showAvatar": false,
+  "defaultDotColor": "#d3d3d3",
+  "items": []
+}
+```
+或者最简单:
+```json
+{
+  "items": []
+}
+```
+
+*终上所述可得:* 
+<Board board="th.json" sort="votes-desc" />
 
 ---
 
