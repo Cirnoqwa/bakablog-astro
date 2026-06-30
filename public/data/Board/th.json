@@ -1,0 +1,43 @@
+{
+  "title": "东方Project人气角色排行榜-测试",
+  "showAvatar": true,
+  "defaultDotColor": "#FFB6C1",
+  "items": [
+    {
+      "id": "1a2b3",
+      "title": "博丽灵梦",
+      "votes": 1024,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "ips": [],
+      "avatar": "reimu.jpg",
+      "dotColor": ""
+    },
+    {
+      "id": "4c5d6",
+      "title": "雾雨魔理沙",
+      "votes": 987,
+      "createdAt": "2025-01-02T00:00:00Z",
+      "ips": [],
+      "avatar": "marisa.jpg",
+      "dotColor": ""
+    },
+    {
+      "id": "7e8f9",
+      "title": "十六夜咲夜",
+      "votes": 856,
+      "createdAt": "2025-01-03T00:00:00Z",
+      "ips": [],
+      "avatar": "",
+      "dotColor": "#C0C0C0"
+    },
+    {
+      "id": "a1b2c",
+      "title": "蕾米莉亚·斯卡蕾特",
+      "votes": 812,
+      "createdAt": "2025-01-04T00:00:00Z",
+      "ips": [],
+      "avatar": "",
+      "dotColor": "#DC143C"
+    }
+  ]
+}

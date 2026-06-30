@@ -1,0 +1,112 @@
+{
+  "categories": [
+    { "name": "根", "color": "#74D1EA" },
+    { "name": "友情链接", "color": "#39C5BB" },
+    { "name": "子友情链接", "color": "#A0AEC0" }
+  ],
+  "nodes": [
+    { 
+      "id": "self", 
+      "name": "Cirno_qwa 的博客", 
+      "symbolSize": 60, 
+      "category": 0,
+      "color": "#74D1EA", 
+      "icon": "/Graph/links/avatar.jpg",
+      "info": "Cirno_qwa制作"
+    },
+    { 
+      "id": "hkbox", 
+      "name": "BlackShell Mod", 
+      "symbolSize": 45, 
+      "category": 1,
+      "color": "#39C5BB",
+      "icon": "/Graph/links/hkbox.png",
+      "info": "NatSuri 开发。<br/><a href='https://blackshellx.org' target='_blank'>点击访问</a>"
+    },
+    { 
+      "id": "marblemc", 
+      "name": "大理石网", 
+      "symbolSize": 45, 
+      "category": 1,
+      "color": "#39C5BB",
+      "icon": "/Graph/links/marblemc.png",
+      "info": "Romarku开发。<br/><a href='https://marblemc.top' target='_blank'>点击访问</a>"
+    },
+    { 
+      "id": "brial", 
+      "name": "brial.cn", 
+      "symbolSize": 45, 
+      "category": 1,
+      "color": "#39C5BB",
+      "icon": "/Graph/links/brial.jpg",
+      "info": "布瑞尔黑科技站点。布瑞尔老总王军开发。<br/><a href='https://brial.cn' target='_blank'>点击访问</a>"
+    },
+    { 
+      "id": "atomforge", 
+      "name": "Atomfor.ge", 
+      "symbolSize": 45, 
+      "category": 1,
+      "color": "#39C5BB",
+      "icon": "/Graph/links/atom.jpg",
+      "info": "AtomForge 服务器状态监视器。<br/><a href='https://atomfor.ge' target='_blank'>点击访问</a>"
+    },
+    { 
+      "id": "jd", 
+      "name": "wnqs0628/KingDingPI", 
+      "symbolSize": 45, 
+      "category": 1,
+      "color": "#39C5BB",
+      "icon": "/Graph/links/e9.jpg",
+      "info": "wnqs0628制作的黑科技鸡丁派。<br/>源码: <a href='https://github.com/wnqs0628/KingDingPI' target='_blank'>点击访问</a>"
+    },
+    { 
+      "id": "jd2", 
+      "name": "wnqs0628/KiDingPi_v2", 
+      "symbolSize": 45, 
+      "category": 1,
+      "color": "#39C5BB",
+      "icon": "/Graph/links/e9.jpg",
+      "info": "wnqs0628制作的黑科技鸡丁派2.0。<br/>源码: <a href='https://github.com/wnqs0628/KiDingPi_v2' target='_blank'>点击访问</a>"
+    },
+    { 
+      "id": "scfdev", 
+      "name": "生存斧DEV", 
+      "symbolSize": 35, 
+      "category": 2,
+      "color": "#A0AEC0",
+      "info": "生存斧服务器。<br/><a href='https://www.axe.ink' target='_blank'>点击访问</a>"
+    },
+    { 
+      "id": "scaxe", 
+      "name": "SCAXE | 猫公社", 
+      "symbolSize": 35, 
+      "category": 2,
+      "color": "#A0AEC0",
+      "info": "SCAXE 猫公社社区。<br/><a href='https://www.catcommune.cn' target='_blank'>点击访问</a>"
+    },
+    { 
+      "id": "sbcmd", 
+      "name": "讨伐爱玩电脑的CMD", 
+      "symbolSize": 45, 
+      "category": 1,
+      "icon": "/Graph/links/anticmd.png",
+      "color": "#39C5BB",
+      "info": "讨伐CMD的网站<br/><a href='https://cmd.kingpop.top' target='_blank'>点击访问</a>"
+    }
+  ],
+  "links": [
+    { "source": "self", "target": "marblemc", "info":"么么哒,Romarku" },
+    { "source": "marblemc", "target": "brial", "color": "red", "info":"竞争⚠️⚠️⚠️<br/><video src='/Graph/links/sbromarku.mp4' controls='controls'></video>" },
+    { "source": "self", "target": "brial" },
+    { "source": "self", "target": "hkbox", "color": "black", "info":"嘿客爸爸我错了😱😱😱😱" },
+    { "source": "self", "target": "atomforge", "color": "#74D1EA", "info":"联通皮古拉" },
+    { "source": "self", "target": "jd", "color": "yellow", "info":"黑科技鸡丁派" },
+    { "source": "brial", "target": "jd", "color": "black", "info":"黑科技鸡丁派" },
+    { "source": "self", "target": "jd2", "color": "yellow", "info":"黑科技鸡丁派2.0" },
+    { "source": "jd2", "target": "jd", "color": "yellow", "info":"黑科技鸡丁派" },
+    { "source": "brial", "target": "jd2", "color": "black", "info":"黑科技鸡丁派2.0" },
+    { "source": "self", "target": "sbcmd", "color": "red", "info":"专业讨伐爱玩电脑的CMD" },
+    { "source": "marblemc", "target": "scfdev", "value": "子链接" },
+    { "source": "marblemc", "target": "scaxe", "value": "子链接" }
+  ]
+}
