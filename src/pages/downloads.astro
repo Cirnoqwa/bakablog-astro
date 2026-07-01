@@ -2,10 +2,18 @@
 
 import { getEntry, render } from "astro:content";
 import Markdown from "@components/misc/Markdown.astro";
+import DownloadManager from "@components/DownloadManager.astro";
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 
+const downloadsPost = await getEntry("spec", "downloads");
+
+if (!downloadsPost) {
+	throw new Error("downloads page content not found");
+}
+
+const { Content } = await render(downloadsPost);
 ---
 <MainGridLayout title={i18n(I18nKey.downloads)} description={i18n(I18nKey.downloads)}>
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
