@@ -66,7 +66,18 @@ const boardName = graph.replace(/\.json$/i, "");
   }
 
   
-  async function renderGraph(container) {
+  const BASE_URL = import.meta.env.BASE_URL ?? '/';
+
+  function resolvePublicUrl(path: string | undefined | null) {
+    if (!path) return '';
+    if (/^(?:[a-z]+:)?\/\//i.test(path) || path.startsWith('data:')) return path;
+
+    const normalizedBase = BASE_URL.endsWith('/') ? BASE_URL : `${BASE_URL}/`;
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    return new URL(cleanPath, window.location.origin + normalizedBase).toString();
+  }
+
+  async function renderGraph(container: HTMLElement) {
     const htmlEl = container;
     const containerId = htmlEl.id;
     const showLabel = htmlEl.dataset.showLabel !== 'false';
@@ -78,24 +89,35 @@ const boardName = graph.replace(/\.json$/i, "");
       try {
         graphData = JSON.parse(propDataRaw);
       } catch (e) {
-        console.warn('Invalid propData, falling back to API');
+        console.warn('Invalid propData, falling back to public asset');
+      }
+    }
+
+    if (!graphData) {
+      const graphFileUrl = resolvePublicUrl(`data/Graph/${board}.json`);
+      try {
+        const res = await fetch(graphFileUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        graphData = await res.json();
+      } catch (e) {
+        console.warn('Failed to load graph data from public asset, fallback to API:', e);
       }
     }
 
     if (!graphData) {
       try {
-        const res = await fetch(`/api/graph?board=${board}`);
+        const res = await fetch(resolvePublicUrl(`api/graph?board=${encodeURIComponent(board)}`));
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         graphData = await res.json();
       } catch (e) {
         console.error('Failed to load graph data:', e);
-        const placeholder = htmlEl.parentElement?.querySelector('.graph-loading-placeholder');
+        const placeholder = htmlEl.parentElement?.querySelector('.graph-loading-placeholder') as HTMLElement | null;
         if (placeholder) placeholder.innerHTML = '加载失败，请刷新重试';
         return;
       }
     }
 
-    const placeholder = htmlEl.parentElement?.querySelector('.graph-loading-placeholder');
+    const placeholder = htmlEl.parentElement?.querySelector('.graph-loading-placeholder') as HTMLElement | null;
     if (placeholder) placeholder.style.display = 'none';
 
     let myChart = echarts.getInstanceByDom(htmlEl);
@@ -109,12 +131,12 @@ const boardName = graph.replace(/\.json$/i, "");
     const themeBgColor = isDark ? '#15171c' : '#f8fafc';
 
     const categoryColors = graphData.categories
-      ? graphData.categories.map(c => c.color || '#cbd5e1')
+      ? (graphData.categories as Array<any>).map((c: any) => c.color || '#cbd5e1')
       : ['#74D1EA', '#39C5BB', '#A0AEC0'];
 
-    const nodes = (graphData.nodes || []).map(node => ({
+    const nodes = (graphData.nodes || []).map((node: any) => ({
       ...node,
-      symbol: node.icon ? `image://${node.icon}` : 'circle',
+      symbol: node.icon ? `image://${resolvePublicUrl(node.icon)}` : 'circle',
       symbolSize: node.symbolSize || 35,
       category: node.category,
       itemStyle: {
@@ -135,7 +157,7 @@ const boardName = graph.replace(/\.json$/i, "");
       }
     }));
 
-    const edges = (graphData.links || []).map(link => ({
+    const edges = (graphData.links || []).map((link: any) => ({
       ...link,
       label: {
         show: showLabel && !!(link.value || link.label),
@@ -161,7 +183,7 @@ const boardName = graph.replace(/\.json$/i, "");
         transitionDuration: 0.2,
         renderMode: 'html',
         extraCssText: 'z-index: 1000; pointer-events: auto; max-width: 300px; border-radius: 8px;',
-        formatter: params => {
+        formatter: (params: any) => {
           if (params.dataType === 'edge') return params.data.info || params.data.value || '连接';
           if (params.dataType === 'node') {
             return params.data.info
@@ -175,7 +197,7 @@ const boardName = graph.replace(/\.json$/i, "");
       },
       legend: graphData.categories
         ? {
-            data: graphData.categories.map(c => c.name),
+            data: (graphData.categories as Array<any>).map((c: any) => c.name),
             textStyle: { color: themeTextColor },
             left: '10px',
             top: '10px'
@@ -194,7 +216,7 @@ const boardName = graph.replace(/\.json$/i, "");
         animationEasingUpdate: 'cubicOut',
         layoutAnimation: true,
         data: nodes,
-        edges: edges,
+        links: edges,
         categories: graphData.categories,
         label: {
           show: showLabel,
@@ -227,7 +249,7 @@ const boardName = graph.replace(/\.json$/i, "");
     myChart.getZr().on('mousedown', (params) => {
       if (!params.target) {
         isBackgroundDragging = true;
-        const event = params.event;
+        const event = params.event as any;
         dragLastX = event.offsetX ?? event.zrX ?? 0;
         dragLastY = event.offsetY ?? event.zrY ?? 0;
       }
@@ -235,8 +257,9 @@ const boardName = graph.replace(/\.json$/i, "");
     myChart.getZr().on('mousemove', (params) => {
       if (!isBackgroundDragging) return;
       const event = params.event;
-      const x = event.offsetX ?? event.zrX;
-      const y = event.offsetY ?? event.zrY;
+      const zrEvent = event as any;
+      const x = zrEvent.offsetX ?? zrEvent.zrX;
+      const y = zrEvent.offsetY ?? zrEvent.zrY;
       if (x == null || y == null) return;
       const dx = (x - dragLastX) * 0.2;
       const dy = (y - dragLastY) * 0.2;
@@ -249,20 +272,20 @@ const boardName = graph.replace(/\.json$/i, "");
     myChart.getZr().on('mouseup', () => { isBackgroundDragging = false; });
     myChart.getZr().on('globalout', () => { isBackgroundDragging = false; });
 
-    htmlEl.addEventListener('wheel', (e) => {
+    htmlEl.addEventListener('wheel', (e: WheelEvent) => {
       e.preventDefault();
       e.stopPropagation();
     }, { passive: false });
 
     let touchStartDistance = 0;
-    htmlEl.addEventListener('touchstart', (e) => {
+    htmlEl.addEventListener('touchstart', (e: TouchEvent) => {
       if (e.touches.length === 2) {
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         touchStartDistance = Math.sqrt(dx * dx + dy * dy);
       }
     }, { passive: true });
-    htmlEl.addEventListener('touchmove', (e) => {
+    htmlEl.addEventListener('touchmove', (e: TouchEvent) => {
       if (e.touches.length === 2 && touchStartDistance > 0) {
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
@@ -293,11 +316,11 @@ const boardName = graph.replace(/\.json$/i, "");
 
   
   async function initAllGraphs() {
-    const containers = document.querySelectorAll('.echarts-trigger-canvas');
+    const containers = document.querySelectorAll<HTMLElement>('.echarts-trigger-canvas');
     for (const el of containers) {
       await renderGraph(el);
     }
-    document.querySelectorAll('.label-toggle-btn').forEach(btn => {
+    document.querySelectorAll<HTMLButtonElement>('.label-toggle-btn').forEach(btn => {
       const targetId = btn.getAttribute('data-target');
       if (targetId && labelStates.has(targetId)) {
         const isActive = labelStates.get(targetId);
@@ -308,7 +331,7 @@ const boardName = graph.replace(/\.json$/i, "");
   }
 
   
-  function toggleLabels(containerId) {
+  function toggleLabels(containerId: string) {
     const currentState = labelStates.get(containerId) ?? true;
     const newState = !currentState;
     labelStates.set(containerId, newState);
@@ -323,12 +346,12 @@ const boardName = graph.replace(/\.json$/i, "");
       const series = currentOption.series[0];
       series.label.show = newState;
       if (series.data) {
-        series.data.forEach(node => {
+        series.data.forEach((node: any) => {
           if (node.label) node.label.show = newState;
         });
       }
-      if (series.edges) {
-        series.edges.forEach(edge => {
+      if (series.links) {
+        series.links.forEach((edge: any) => {
           if (edge.label) edge.label.show = newState && !!(edge.value || edge.label.formatter);
         });
       }
@@ -342,7 +365,7 @@ const boardName = graph.replace(/\.json$/i, "");
     }
   }
   
-  function handleZoom(containerId, direction) {
+  function handleZoom(containerId: string, direction: 'in' | 'out') {
     const container = document.getElementById(containerId);
     if (!container) return;
     const chart = chartInstances.get(container);
@@ -367,9 +390,9 @@ const boardName = graph.replace(/\.json$/i, "");
   }
 
  
-  document.addEventListener('click', (e) => {
-    const target = e.target;
-    const labelBtn = target.closest?.('.label-toggle-btn');
+  document.addEventListener('click', (e: MouseEvent) => {
+    const target = e.target instanceof Element ? e.target : null;
+    const labelBtn = target?.closest('.label-toggle-btn');
     if (labelBtn) {
       e.stopPropagation();
       const containerId = labelBtn.getAttribute('data-target');
@@ -384,7 +407,7 @@ const boardName = graph.replace(/\.json$/i, "");
       return;
     }
 
-    const zoomInBtn = target.closest?.('.zoom-in-btn');
+    const zoomInBtn = target?.closest('.zoom-in-btn');
     if (zoomInBtn) {
       e.stopPropagation();
       const containerId = zoomInBtn.getAttribute('data-target');
@@ -399,7 +422,7 @@ const boardName = graph.replace(/\.json$/i, "");
       return;
     }
 
-    const zoomOutBtn = target.closest?.('.zoom-out-btn');
+    const zoomOutBtn = target?.closest('.zoom-out-btn');
     if (zoomOutBtn) {
       e.stopPropagation();
       const containerId = zoomOutBtn.getAttribute('data-target');

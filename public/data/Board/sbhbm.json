@@ -2,5 +2,15 @@
   "title": "HBM小鬼",
   "showAvatar": false,
   "defaultDotColor": "#d3d3d3",
-  "items": []
+  "items": [
+    {
+      "id": "mr1fn44i-85khnn",
+      "title": "凤宇",
+      "votes": 676767,
+      "createdAt": "2026-07-01T02:04:32.034Z",
+      "ips": [],
+      "avatar": "",
+      "dotColor": "red"
+    }
+  ]
 }
