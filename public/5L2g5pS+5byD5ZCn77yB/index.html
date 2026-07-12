@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aetheris · 医药科技</title>
     <style>
-       
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             background: #f9fafc;
             font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
@@ -23,8 +21,6 @@
             align-items: center;
             padding: 2rem 1rem;
         }
-
-        
         .container {
             max-width: 1200px;
             width: 100%;
@@ -35,8 +31,6 @@
             position: relative;
             transition: box-shadow 0.2s;
         }
-
- 
         .header {
             display: flex;
             justify-content: space-between;
@@ -44,7 +38,6 @@
             padding-bottom: 1.5rem;
             border-bottom: 1px solid #eef0f2;
         }
-
         .logo h1 {
             font-size: 1.8rem;
             font-weight: 300;
@@ -61,34 +54,6 @@
             letter-spacing: 3px;
             font-weight: 300;
         }
-
-        .nav a {
-            margin-left: 2rem;
-            text-decoration: none;
-            color: #3a4a5a;
-            font-size: 0.95rem;
-            font-weight: 500;
-            transition: color 0.2s;
-            position: relative;
-        }
-        .nav a:hover {
-            color: #2a7f6e;
-        }
-        .nav a::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: #2a7f6e;
-            transition: width 0.25s;
-        }
-        .nav a:hover::after {
-            width: 100%;
-        }
-
-       
         .hero {
             margin: 2.5rem 0 3rem;
             padding: 2.5rem 3rem;
@@ -114,7 +79,6 @@
             margin-top: 0.5rem;
             font-weight: 300;
         }
-
         .hero .corner-mark {
             position: absolute;
             right: 2rem;
@@ -125,7 +89,6 @@
             user-select: none;
             font-weight: 300;
         }
-
         .stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -140,6 +103,7 @@
             border: 1px solid #ebeff2;
             transition: background 0.2s;
             position: relative;
+            cursor: crosshair;
         }
         .stat-card:hover {
             background: #f2f6f8;
@@ -161,7 +125,6 @@
             margin-top: 0.3rem;
             font-weight: 400;
         }
-
         .stat-card::after {
             content: '';
             position: absolute;
@@ -172,7 +135,6 @@
             background: #dce3e8;
             border-radius: 2px;
         }
-
         .stat-card:nth-child(1)::after {
             background: #b8c9d4;
         }
@@ -182,7 +144,6 @@
         .stat-card:nth-child(3)::after {
             background: #d0dadd;
         }
-
         .section-title {
             font-size: 1.5rem;
             font-weight: 300;
@@ -192,7 +153,6 @@
             border-left: 4px solid #2a7f6e;
             padding-left: 1rem;
         }
-
         .products {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -205,6 +165,7 @@
             padding: 1.8rem 1.5rem;
             border: 1px solid #eef2f4;
             transition: all 0.2s;
+            cursor: crosshair;
         }
         .product-item:hover {
             border-color: #c8d4dc;
@@ -241,8 +202,6 @@
             padding-top: 0.6rem;
             text-align: right;
         }
-
-
         .footer {
             margin-top: 2.5rem;
             padding-top: 2rem;
@@ -267,8 +226,6 @@
             color: #4a5a6a;
             border-bottom-color: #8a9aa8;
         }
-
-
         .download-link {
             display: inline-block;
             padding: 0.5rem 1.2rem;
@@ -288,11 +245,6 @@
             color: #1a2a3a;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
         }
-        .download-link .icon {
-            margin-right: 6px;
-            opacity: 0.6;
-        }
-
         .hidden-message {
             position: fixed;
             bottom: 12px;
@@ -307,8 +259,10 @@
             writing-mode: vertical-rl;
             text-orientation: mixed;
         }
-
-        /* ===== 响应式 ===== */
+        ::selection {
+            background: #d4e0e8;
+            color: #1a2a3a;
+        }
         @media (max-width: 820px) {
             .container {
                 padding: 1.8rem 1.5rem;
@@ -327,10 +281,6 @@
                 align-items: flex-start;
                 gap: 0.8rem;
             }
-            .nav a {
-                margin-left: 0;
-                margin-right: 1.5rem;
-            }
         }
         @media (max-width: 520px) {
             .stats {
@@ -346,54 +296,21 @@
                 font-size: 1.6rem;
             }
         }
-
-        ::selection {
-            background: #d4e0e8;
-            color: #1a2a3a;
-        }
-
-        .stat-card:hover,
-        .product-item:hover {
-            cursor: crosshair;
-        }
-
-        .footer .download-link {
-            background: #f0f3f5;
-            border-color: #d8e0e5;
-        }
-        .footer .download-link .arrow {
-            display: inline-block;
-            transition: transform 0.2s;
-        }
-        .footer .download-link:hover .arrow {
-            transform: translateX(3px) rotate(-12deg);
-        }
     </style>
 </head>
 <body>
-
     <div class="container">
-
-       
         <header class="header">
             <div class="logo">
                 <h1><span>Aetheris</span> 医药科技</h1>
                 <div class="tagline">ADVANCING HEALTH · SECURING TOMORROW</div>
             </div>
-            <div class="nav">
-                <a href="#0">首页</a>
-                <a href="#0">产品</a>
-                <a href="#0">研究</a>
-                <a href="#0">关于</a>
-            </div>
         </header>
-
         <section class="hero">
             <h2>以 <strong>数据</strong> 驱动 · 以 <strong>生命</strong> 为本</h2>
             <p>我们致力于将前沿生物技术与临床实践深度融合，为全球医疗体系提供可及的解决方案。</p>
             <div class="corner-mark">✦  SINCE 2018  ✦</div>
         </section>
-
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-number">12,847 <span class="small">+</span></div>
@@ -408,32 +325,24 @@
                 <div class="stat-label">平均响应时间</div>
             </div>
         </div>
-
-   
         <div class="section-title">核心管线</div>
         <div class="products">
-
             <div class="product-item">
                 <div class="product-name">NeuroStabil<span class="tm">™</span></div>
                 <div class="product-desc">靶向中枢神经调节，用于改善睡眠节律与情绪稳态。</div>
                 <span class="footnote">— Ⅲ 期临床已完成</span>
             </div>
-
             <div class="product-item">
                 <div class="product-name">VitaCore<span class="tm">™</span></div>
                 <div class="product-desc">细胞能量代谢优化，支持组织修复与再生微环境。</div>
                 <span class="footnote">— Ⅱ 期临床进行中</span>
             </div>
-
             <div class="product-item">
                 <div class="product-name">DermaShield<span class="tm">™</span></div>
                 <div class="product-desc">皮肤屏障修复复合物，适用于环境暴露后的表皮恢复。</div>
                 <span class="footnote">— 已获 FDA 突破性认定</span>
             </div>
-
         </div>
-
-   
         <footer class="footer">
             <div class="copy">
                 © 2026 Aetheris · 保留所有权利 &nbsp;|&nbsp; 
@@ -442,15 +351,11 @@
             </div>
             <div>
                 <a href="img/" download="5a6M5LqG44CC44CC44CC5Y+I5pyJ5Lq66LiP5YWl5LqG5a6e6aqM44CC44CC44CC44CC.img" class="download-link">
-                    <span class="icon">⬇</span> 
-                    <span class="arrow">↗</span> 不要回到上一级网页
+                    不要回到上一级网页
                 </a>
             </div>
         </footer>
-
     </div>
-
     <div class="hidden-message">we·are·watching</div>
-
 </body>
 </html>
