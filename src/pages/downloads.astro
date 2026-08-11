@@ -1,8 +1,8 @@
 ---
-
 import { getEntry, render } from "astro:content";
 import Markdown from "@components/misc/Markdown.astro";
 import DownloadManager from "@components/DownloadManager.astro";
+import { Icon } from "astro-icon/components";
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
@@ -16,11 +16,46 @@ if (!downloadsPost) {
 const { Content } = await render(downloadsPost);
 ---
 <MainGridLayout title={i18n(I18nKey.downloads)} description={i18n(I18nKey.downloads)}>
-    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32 mb-4">
         <div class="card-base z-10 px-9 py-6 relative w-full ">
             <Markdown class="mt-2">
                 <Content />
             </Markdown>
         </div>
     </div>
+
+    <!-- Spec Giscus评论 -->
+    <div class="card-base p-6 rounded-[var(--radius-large)] onload-animation mb-4 relative min-h-[120px]">
+        <div id="giscus-loading" class="flex flex-col items-center justify-center py-6 text-black/50 dark:text-white/50 gap-3">
+            <Icon name="material-symbols:progress-activity" class="animate-spin text-3xl text-[var(--primary)]" />
+            <span class="text-sm font-medium">正在加载评论区...</span>
+        </div>
+
+        <script src="https://giscus.app/client.js"
+                data-repo="Cirnoqwa/blogchat"
+                data-repo-id="R_kgDOShB_lA"
+                data-category="General"
+                data-category-id="DIC_kwDOShB_lM4C9Udy"
+                data-mapping="pathname"
+                data-strict="0"
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-input-position="top"
+                data-theme="preferred_color_scheme"
+                data-lang="zh-CN"
+                data-loading="lazy"
+                crossorigin="anonymous"
+                async>
+        </script>
+    </div>
+
+    <script is:inline>
+        window.addEventListener('message', (event) => {
+            if (event.origin !== 'https://giscus.app') return;
+            const loadingEl = document.getElementById('giscus-loading');
+            if (loadingEl) {
+                loadingEl.style.display = 'none';
+            }
+        });
+    </script>
 </MainGridLayout>
