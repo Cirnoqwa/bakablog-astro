@@ -16,15 +16,14 @@ if (!downloadsPost) {
 const { Content } = await render(downloadsPost);
 ---
 <MainGridLayout title={i18n(I18nKey.downloads)} description={i18n(I18nKey.downloads)}>
-    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32 mb-4">
-        <div class="card-base z-10 px-9 py-6 relative w-full ">
-            <Markdown class="mt-2">
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
+        <div id="post-container" class="card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full">
+            <Markdown class="mb-6 markdown-content onload-animation">
                 <Content />
             </Markdown>
         </div>
     </div>
-
-    <!-- Spec Giscus评论 -->
+    
     <div class="card-base p-6 rounded-[var(--radius-large)] onload-animation mb-4 relative min-h-[120px]">
         <div id="giscus-loading" class="flex flex-col items-center justify-center py-6 text-black/50 dark:text-white/50 gap-3">
             <Icon name="material-symbols:progress-activity" class="animate-spin text-3xl text-[var(--primary)]" />
