@@ -22,6 +22,7 @@ interface Props {
 	lang?: string;
 	setOGTypeArticle?: boolean;
 	headings?: MarkdownHeading[];
+	entry?: any; 
 }
 
 const {
@@ -31,7 +32,11 @@ const {
 	lang,
 	setOGTypeArticle,
 	headings = [],
+	entry,
 } = Astro.props;
+
+const showComment = entry?.data?.comment !== false;
+
 const hasBannerCredit =
 	siteConfig.banner.enable && siteConfig.banner.credit.enable;
 const hasBannerLink = !!siteConfig.banner.credit.url;
@@ -84,9 +89,30 @@ const mainPanelTop = siteConfig.banner.enable
 
             <main id="swup-container" class="transition-swup-fade col-span-2 lg:col-span-1 overflow-hidden">
                 <div id="content-wrapper" class="onload-animation">
-                    <!-- the overflow-hidden here prevent long text break the layout-->
-                    <!-- make id different from windows.swup global property -->
                     <slot></slot>
+
+                    <!-- Giscus 评论 -->
+                    {showComment && (
+                        <div class="card-base p-6 rounded-[var(--radius-large)] onload-animation mb-4">
+                            <script src="https://giscus.app/client.js"
+                                    data-repo="Cirnoqwa/blogchat"
+                                    data-repo-id="R_kgDOShB_lA"
+                                    data-category="General"
+                                    data-category-id="DIC_kwDOShB_lM4C9Udy"
+                                    data-mapping="pathname"
+                                    data-strict="0"
+                                    data-reactions-enabled="1"
+                                    data-emit-metadata="0"
+                                    data-input-position="top"
+                                    data-theme="preferred_color_scheme"
+                                    data-lang="zh-CN"
+                                    data-loading="lazy"
+                                    crossorigin="anonymous"
+                                    async>
+                            </script>
+                        </div>
+                    )}
+
                     <div class="footer col-span-2 onload-animation hidden lg:block">
                         <Footer></Footer>
                     </div>

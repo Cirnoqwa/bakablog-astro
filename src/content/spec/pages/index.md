@@ -27,24 +27,6 @@ draft: false
 <mark style="background-color: #39C5BB; padding: 4px 10px; border-radius: 6px 0 0 6px;">
     <a href="/pages/hacknet/index.html" style="color: white; text-decoration: none; font-weight: bold;">Hacknet</a>
 </mark><mark style="background-color: #FFB6C1; padding: 4px 10px; border-radius: 0 6px 6px 0; color: white; font-size: 0.9em;font-weight: bold;">
-    作者: Gemini😂😂为了致敬Hacknet
+    作者: Gemini😂😂为了致敬Hacknet(东子网站😂)
 </mark>
 </p>
-
----
-<script src="https://giscus.app/client.js"
-        data-repo="Cirnoqwa/blogchat"
-        data-repo-id="R_kgDOShB_lA"
-        data-category="General"
-        data-category-id="DIC_kwDOShB_lM4C9Udy"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="preferred_color_scheme"
-        data-lang="zh-CN"
-        data-loading="lazy"
-        crossorigin="anonymous"
-        async>
-</script>
