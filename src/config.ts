@@ -88,7 +88,7 @@ export const profileConfig: ProfileConfig = {
 	],
 };
 
-//这个好像是开关条款显示的吧
+//开关条款显示
 export const licenseConfig: LicenseConfig = {
 	enable: false,
 	name: "CC BY-NC-SA 4.0",

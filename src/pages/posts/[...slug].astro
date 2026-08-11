@@ -35,7 +35,7 @@ const { Content, headings } = await entry.render();
 
 const { remarkPluginFrontmatter } = await entry.render();
 
-// 乐子评论
+// 评论
 const showComment = entry.data.comment !== false;
 
 const jsonLd = {
@@ -107,7 +107,6 @@ const jsonLd = {
                 <ImageWrapper id="post-cover" src={entry.data.image} basePath={path.join("content/posts/", getDir(entry.id))} class="mb-8 rounded-xl banner-container onload-animation"/>
             }
 
-
             <Markdown class="mb-6 markdown-content onload-animation">
                 <Content />
             </Markdown>
@@ -116,6 +115,28 @@ const jsonLd = {
 
         </div>
     </div>
+
+    <!-- Giscus 评论 -->
+    {showComment && (
+        <div class="card-base p-6 rounded-[var(--radius-large)] onload-animation mb-4">
+            <script src="https://giscus.app/client.js"
+                    data-repo="Cirnoqwa/blogchat"
+                    data-repo-id="R_kgDOShB_lA"
+                    data-category="General"
+                    data-category-id="DIC_kwDOShB_lM4C9Udy"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="top"
+                    data-theme="preferred_color_scheme"
+                    data-lang="zh-CN"
+                    data-loading="lazy"
+                    crossorigin="anonymous"
+                    async>
+            </script>
+        </div>
+    )}
 
     <div class="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full">
         <a href={entry.data.nextSlug ? getPostUrlBySlug(entry.data.nextSlug) : "#"}
@@ -138,27 +159,5 @@ const jsonLd = {
             </div>}
         </a>
     </div>
-
-    <!-- Giscus 评论组件 -->
-    {showComment && (
-        <div class="card-base p-6 rounded-[var(--radius-large)] onload-animation">
-            <script src="https://giscus.app/client.js"
-                    data-repo="Cirnoqwa/blogchat"
-                    data-repo-id="R_kgDOShB_lA"
-                    data-category="General"
-                    data-category-id="DIC_kwDOShB_lM4C9Udy"
-                    data-mapping="pathname"
-                    data-strict="0"
-                    data-reactions-enabled="1"
-                    data-emit-metadata="0"
-                    data-input-position="top"
-                    data-theme="preferred_color_scheme"
-                    data-lang="zh-CN"
-                    data-loading="lazy"
-                    crossorigin="anonymous"
-                    async>
-            </script>
-        </div>
-    )}
 
 </MainGridLayout>
