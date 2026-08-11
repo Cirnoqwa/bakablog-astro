@@ -13,19 +13,18 @@ import ImageWrapper from "../../components/misc/ImageWrapper.astro";
 import PostMetadata from "../../components/PostMeta.astro";
 import { profileConfig, siteConfig } from "../../config";
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
-import { pinyin } from 'pinyin-pro'; // 🎯 核心引入：拼音转换插件
+import { pinyin } from 'pinyin-pro'; 
 
 export async function getStaticPaths() {
 	const blogEntries = await getSortedPosts();
 	return blogEntries.map((entry) => {
-		// 🎯 核心逻辑：如果文章 frontmatter 没写 slug，就自动把 entry.id（中文文件名）转成干净的拼音
 		const cleanSlug = entry.slug || pinyin(entry.id, { 
 			toneType: 'none', 
 			vToMod: 'u' 
 		}).replace(/\s+/g, '-').toLowerCase();
 
 		return {
-			params: { slug: cleanSlug }, // 🎯 让 Astro 按照拼音路径去打包生成页面
+			params: { slug: cleanSlug }, 
 			props: { entry },
 		};
 	});
@@ -35,6 +34,9 @@ const { entry } = Astro.props;
 const { Content, headings } = await entry.render();
 
 const { remarkPluginFrontmatter } = await entry.render();
+
+// 乐子评论
+const showComment = entry.data.comment !== false;
 
 const jsonLd = {
 	"@context": "https://schema.org",
@@ -136,5 +138,27 @@ const jsonLd = {
             </div>}
         </a>
     </div>
+
+    <!-- Giscus 评论组件 -->
+    {showComment && (
+        <div class="card-base p-6 rounded-[var(--radius-large)] onload-animation">
+            <script src="https://giscus.app/client.js"
+                    data-repo="Cirnoqwa/blogchat"
+                    data-repo-id="R_kgDOShB_lA"
+                    data-category="General"
+                    data-category-id="DIC_kwDOShB_lM4C9Udy"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="top"
+                    data-theme="preferred_color_scheme"
+                    data-lang="zh-CN"
+                    data-loading="lazy"
+                    crossorigin="anonymous"
+                    async>
+            </script>
+        </div>
+    )}
 
 </MainGridLayout>

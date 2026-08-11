@@ -234,22 +234,3 @@ FPV(一种无人机的变种，飞的很快)😇
 <p>
 <mark style="background-color: #39C5BB; padding: 4px 10px; border-radius: 6px 0 0 6px;"><a href="http://cmd.kingpop.top" style="color: white; text-decoration: none; font-weight: bold;target='_blank';">友情链接</a></mark><mark style="background-color: #FFB6C1; padding: 4px 10px; border-radius: 0 6px 6px 0; color: white; font-size: 0.9em;"><a href="http://cmd.kingpop.top" style="color: white; text-decoration: none; font-weight: bold;target='_blank';">http://cmd.kingpop.top</a></mark>
 </p>
-
----
-
-<script is:inline src="https://giscus.app/client.js"
-        data-repo="Cirnoqwa/blogchat"
-        data-repo-id="R_kgDOShB_lA"
-        data-category="General"
-        data-category-id="DIC_kwDOShB_lM4C9Udy"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="preferred_color_scheme"
-        data-lang="zh-CN"
-        data-loading="lazy"
-        crossorigin="anonymous"
-        async>
-</script>

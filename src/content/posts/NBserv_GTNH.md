@@ -21,21 +21,3 @@ QQ Group: 926548517<br>
 
 <img src="/GTNH/QQQR.jpg" width="50%"><br>
 
----
-
-<script is:inline src="https://giscus.app/client.js"
-        data-repo="Cirnoqwa/blogchat"
-        data-repo-id="R_kgDOShB_lA"
-        data-category="General"
-        data-category-id="DIC_kwDOShB_lM4C9Udy"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="preferred_color_scheme"
-        data-lang="zh-CN"
-        data-loading="lazy"
-        crossorigin="anonymous"
-        async>
-</script>
