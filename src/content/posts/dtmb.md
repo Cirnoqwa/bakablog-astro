@@ -13,10 +13,10 @@ comment: true
 > 实录：
 > 
 > <img src="/dtmb/test.jpg" width="75%" alt="固定在三脚架的八木天线" />
->**应水平放置,这里没固定好跑了** 
+> ** 应水平放置,这里没固定好跑了 ** 
 > <br />
 > <video src="/dtmb/dtmb.mp4" width="640" height="360" controls></video> 
->**接收到4个频道:CCTV-9,11,17 CGTN**
+> ** 接收到4个频道:CCTV-9,11,17 CGTN **
 > <br />
 
 
@@ -41,8 +41,6 @@ comment: true
 
 ## 演示图
 
-
-<div align="center" style="margin: 20px 0;">
 <svg width="100%" height="auto" viewBox="0 0 1100 600" xmlns="http://www.w3.org/2000/svg" style="background-color: #ffffff; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
     <defs>
         <style>
@@ -129,7 +127,6 @@ comment: true
     <path d="M 920 305 L 980 305 L 970 295 M 980 305 L 970 315" stroke="#333333" stroke-width="2" fill="none"></path>
     <text x="990" y="310" class="text-label" fill="#333333" text-anchor="start">指向电视塔</text>
 </svg>
-</div>
 
 ## 接线说明
 
