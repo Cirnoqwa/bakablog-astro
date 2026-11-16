@@ -11,13 +11,11 @@ comment: true
 ---
 
 > 实录：
-> 
-> <img src="/dtmb/test.jpg" width="75%" alt="固定在三脚架的八木天线" />
-> **应该水平放置,这里没固定好自己转成垂直了** 
-> <br />
-> <video src="/dtmb/dtmb.mp4" width="640" height="360" controls></video> 
-> **接收到4个频道:CCTV-9,11,17 CGTN** 
-> <br />
+> <img src="/dtmb/test.jpg" width="75%" alt="固定在三脚架的八木天线" /> <br />
+ **应该水平放置,这里没固定好自己转成垂直了** 
+ 
+> <video src="/dtmb/dtmb.mp4" width="640" height="360" controls></video> <br />
+ **接收到4个频道:CCTV-9,11,17 CGTN** 
 
 
 ## 用料
