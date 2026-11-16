@@ -17,7 +17,7 @@ title: "${title}"
 published: ${formatDate}
 updated: ${formatDate}
 draft: false
-description: ""
+description: " "
 image: ""
 tags: []
 category: ""
