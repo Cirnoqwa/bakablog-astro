@@ -15,7 +15,7 @@ comment: true
  **应该水平放置,这里没固定好自己转成垂直了** 
  
 > <video src="/dtmb/dtmb.mp4" width="640" height="360" controls></video> <br />
- **接收到4个频道:CCTV-9,11,17 CGTN** 
+ **接收到4个频道: CCTV-9,11,17 CGTN** 
 
 
 ## 用料
