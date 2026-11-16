@@ -3,7 +3,7 @@ title: "手搓中心频率474Mhz五单元八木天线"
 published: 2026-11-15
 updated: 2026-11-16
 draft: false
-description: "&nbsp;"
+description: " "
 image: "/dtmb/dtmb_r.jpg"
 tags: ["手搓","无线电","DTMB"]
 category: "无线电"
